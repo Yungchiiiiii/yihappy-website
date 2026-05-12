@@ -498,3 +498,513 @@ function App() {
     setQuoteList((prev) => {
       const has  = prev.includes(p.id);
       const next = has ? prev.filter(x => x !== p.id) : [...prev, p.id];
+      if (!has) setTrayHidden(false);
+      return next;
+    });
+  };
+
+  const priceBase = { textbook:[12,24], digital:[28,60], hardcover:[180,420], education:[18,38], corporate:[60,180], custom:[80,240] };
+  const [lo, hi]  = priceBase[svc].map(v => Math.round(v * qty));
+  const fmt = (n) => n.toLocaleString("en-US");
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setFormStatus("sending");
+    const data = new FormData(e.target);
+    data.append("access_key",  "195eb9d9-0c69-416e-821b-e723e66f123a");
+    data.append("subject",     "【倚樂企業】新詢問 from yihappy.com.tw");
+    data.append("from_name",   "Yi Happy 網站表單");
+    try {
+      const res  = await fetch("https://api.web3forms.com/submit", { method: "POST", body: data });
+      const json = await res.json();
+      if (json.success) {
+        setFormStatus("sent");
+        e.target.reset();
+        setTimeout(() => setFormStatus("idle"), 6000);
+      } else {
+        setFormStatus("error");
+        setTimeout(() => setFormStatus("idle"), 4000);
+      }
+    } catch {
+      setFormStatus("error");
+      setTimeout(() => setFormStatus("idle"), 4000);
+    }
+  };
+
+  const tickerAll = [...TICKER_ITEMS, ...TICKER_ITEMS];
+
+  return (
+    <div>
+      {/* NAV */}
+      <nav className={"nav " + (scrolled ? "scrolled" : "")}>
+        <a className="brand" href="#top">
+          <div className="brand-mark"><img src="logo.svg" alt="倚樂 Yi Happy" /></div>
+          <div className="brand-name">
+            <span className="zh">企業有限公司</span>
+            <span className="en">Yi Happy Co., Ltd. · Est. 2009</span>
+          </div>
+        </a>
+        <div className="nav-links">
+          <a href="#about"><span className="num">01</span>關於</a>
+          <a href="#products"><span className="num">02</span>服務</a>
+          <a href="#process"><span className="num">03</span>流程</a>
+          <a href="#why"><span className="num">04</span>優勢</a>
+          <a href="#contact"><span className="num">05</span>聯絡</a>
+        </div>
+        <a href="#contact" className="btn btn-primary btn-sm">立即報價 <span className="arr">→</span></a>
+      </nav>
+
+      {/* HERO */}
+      <section className="hero container" id="top">
+        <div className="hero-grid">
+          <div>
+            <span className="eyebrow">Since 2009 · 新北中和</span>
+            <h1 style={{ marginTop: 24 }}>
+              Pages that <span className="it">last</span>,<br />
+              ink that <span className="it">speaks.</span>
+              <span className="han">為知識而印 · 為品牌而印</span>
+            </h1>
+            <p className="hero-sub">
+              倚樂企業有限公司，自 2009 年起深耕教科書與精緻書籍印刷。
+              以實在的合作模式、穩定的品質與一站式服務，
+              成為出版社、教育機構與品牌客戶長期信賴的印刷夥伴。
+            </p>
+            <div className="hero-actions">
+              <a href="#contact" className="btn btn-primary">索取報價 <span className="arr">→</span></a>
+              <a href="#products" className="btn btn-ghost">查看服務</a>
+            </div>
+          </div>
+          <div className="hero-figure">
+            <div className="stripes"></div>
+            <div className="ink-block">
+              <div className="num">No. 001 · Hardcover Series</div>
+              <div className="ti">
+                Crafted<br />in Zhonghe
+                <span className="sub">職人精神 · 一冊一品</span>
+              </div>
+            </div>
+            <div className="label">[ 高解析印刷成品特寫 ]</div>
+          </div>
+        </div>
+
+        <div className="hero-meta">
+          <div className="stat"><div className="n">17<sup>YRS</sup></div><div className="l">深耕印刷產業</div></div>
+          <div className="stat"><div className="n">100<sup>+</sup></div><div className="l">長期合作客戶</div></div>
+          <div className="stat"><div className="n">6<sup>項</sup></div><div className="l">主要印刷服務範疇</div></div>
+        </div>
+
+        <div className="ticker">
+          <div className="ticker-track">
+            {tickerAll.map((s, i) => <span key={i}>{s}</span>)}
+          </div>
+        </div>
+      </section>
+
+      <div className="section-divider"></div>
+
+      {/* ABOUT */}
+      <section id="about" className="container">
+        <div className="section-head reveal">
+          <h2>About <span className="serif">us</span><span className="han">關於倚樂</span></h2>
+          <p className="lede">
+            自 2009 年於新北中和創立，倚樂企業專注於教科書與精緻書籍印刷。
+            我們相信，好的印刷不只是把油墨壓在紙上，而是讓知識、品牌、情感得以被妥善保存與傳遞。
+          </p>
+        </div>
+        <div className="about-grid">
+          <div className="about-figure reveal">
+            <div className="stripes"></div>
+            <div className="stack"><div></div><div></div><div></div><div></div><div></div></div>
+            <div className="label">[ paper stack · 用紙堆疊 ]</div>
+          </div>
+          <div className="about-body reveal">
+            <p className="lead">
+              「以實在對待每一本書，<br />
+              以誠心對待每一位客戶。」
+            </p>
+            <p>
+              從教科書到藝術書、從萬本量產到單冊收藏，我們以一致的標準把關每一道工序。
+              裝幀、色彩、紙張的選擇都有師傅實際把關，讓成品經得起時間的考驗。
+            </p>
+            <p>
+              我們的廠區位於新北中和，自有印刷、裝訂、後加工全產線。從打樣到出貨，
+              一條龍服務讓您能直接與印務、裝幀師傅溝通，避免層層轉手帶來的延誤與誤差。
+            </p>
+            <div className="about-marks">
+              <div><div className="k">01</div><div className="n">一條龍</div><div className="l">自有印製與後加工產線</div></div>
+              <div><div className="k">02</div><div className="n">高 CP 值</div><div className="l">實在合作·品質不打折扣</div></div>
+              <div><div className="k">03</div><div className="n">長期作伴</div><div className="l">與客戶一起踏實長期</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PRODUCTS */}
+      <section id="products" className="products">
+        <div className="container">
+          <div className="section-head reveal">
+            <h2>Our <span className="serif">services</span><span className="han">我們的印刷服務</span></h2>
+            <p className="lede">
+              從教科書、精裝書到企業形象印刷品，六大服務範疇皆由廠內職人團隊全程把關。
+              點選卡片查看細節，或加入報價清單。
+            </p>
+          </div>
+        </div>
+
+        <div className="marquee">
+          <div className="marquee-track">
+            {[...PRODUCTS, ...PRODUCTS, ...PRODUCTS].map((p, i) => (
+              <div className="marquee-item" key={i}>
+                <span className="sep"></span>
+                <span>{p.en}</span>
+                <span className="han">{p.zh}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="container">
+          <div className="product-grid">
+            {PRODUCTS.map((p) => (
+              <article className="product-card reveal" key={p.id} onClick={() => setModal(p)}>
+                <div className="thumb">
+                  <div className="stripes"></div>
+                  <div className="num">{p.num}</div>
+                  <div className="placeholder">{p.glyph}</div>
+                  <div className="label-tag">[ product shot ]</div>
+                </div>
+                <div className="body">
+                  <h3><span>{p.en}</span><span className="han">{p.zh}</span></h3>
+                  <p className="desc">{p.desc}</p>
+                  <div className="foot">
+                    <span className="meta">View details →</span>
+                    <button
+                      className={"add " + (quoteList.includes(p.id) ? "added" : "")}
+                      onClick={(e) => { e.stopPropagation(); toggleQuote(p); }}
+                    >
+                      <span className="plus">{quoteList.includes(p.id) ? "✓" : "+"}</span>
+                      {quoteList.includes(p.id) ? "已加入" : "加入報價"}
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PROCESS */}
+      <section id="process" className="process">
+        <div className="container">
+          <div className="section-head reveal">
+            <h2>Our <span className="serif">process</span><span className="han">服務流程</span></h2>
+            <p className="lede">五個階段，全程透明。每一步都有專屬聯絡窗口，問題即時回應。</p>
+          </div>
+          <div className="process-grid reveal">
+            {PROCESS.map((s) => (
+              <div className="process-step" key={s.num}>
+                <div className="num">{s.num}</div>
+                <h3 className="han">{s.zh}</h3>
+                <div className="en">{s.en}</div>
+                <p>{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* WHY */}
+      <section id="why" className="why">
+        <div className="container">
+          <div className="section-head reveal">
+            <h2>Why <span className="serif">Yi Happy</span><span className="han">為什麼選擇我們</span></h2>
+            <p className="lede">
+              多年來穩定服務的背後，是對品質與客戶關係的長期堅持。
+              四項承諾，每一項都可被檢驗。
+            </p>
+          </div>
+          <div className="why-grid reveal">
+            {WHY.map((w) => (
+              <div className="why-item" key={w.ix}>
+                <div className="ix">{w.ix}</div>
+                <h3><span>{w.en}</span><span className="han">{w.zh}</span></h3>
+                <p>{w.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* QUOTE TOOL */}
+      <section className="quote-tool">
+        <div className="container reveal">
+          <span className="eyebrow" style={{ color: "rgba(244,239,230,0.6)" }}>Instant estimate · 即時估價</span>
+          <h2 style={{ marginTop: 28 }}>
+            Quick price <span className="serif">preview</span>
+            <span className="han">線上預估，三十秒</span>
+          </h2>
+          <div className="qt-grid">
+            <div className="qt-controls">
+              <div className="field">
+                <label>選擇服務 · Service Type</label>
+                <div className="opts">
+                  {PRODUCTS.map(p => (
+                    <button key={p.id} className={"opt " + (svc === p.id ? "active" : "")} onClick={() => setSvc(p.id)}>
+                      {p.zh}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="field">
+                <label>數量 · Quantity (本 / Copies)</label>
+                <div className="qty">
+                  <input type="range" min="50" max="10000" step="50" value={qty} onChange={e => setQty(+e.target.value)} />
+                  <span className="v">{fmt(qty)}</span>
+                </div>
+              </div>
+            </div>
+            <div className="qt-result">
+              <div className="lbl">預估價格區間 · Estimated Range</div>
+              <div className="price">
+                <span className="currency">NT$</span>{fmt(lo)}<span className="dash">—</span>{fmt(hi)}
+              </div>
+              <p className="price-note">
+                此為線上速算僅供參考。實際報價將依紙張、後加工、裝幀方式調整。
+                完成詳細需求後，我們將於 1 個工作日內提供正式報價單。
+              </p>
+              <a href="#contact" className="btn btn-primary">取得正式報價 <span className="arr">→</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section id="contact" className="contact">
+        <div className="container">
+          <div className="section-head reveal">
+            <h2>Let's <span className="serif">talk</span><span className="han">聯絡我們</span></h2>
+            <p className="lede">
+              無論是緊急加印、長期合作或單純的工藝諮詢，
+              都歡迎來電或填寫表單，我們將於 1 個工作日內回覆。
+            </p>
+          </div>
+          <div className="contact-grid reveal">
+            <div>
+              <div className="contact-info">
+                <div className="row"><span className="k">Address</span><span className="v">新北市中和區中山路二段 530 號 4 樓之一</span></div>
+                <div className="row"><span className="k">Phone</span><span className="v"><a href="tel:0222265720">02 · 2226 · 5720</a></span></div>
+                <div className="row"><span className="k">Hours</span><span className="v">週一至週五 · 09:00 – 18:00</span></div>
+                <div className="row"><span className="k">Email</span><span className="v"><a href="mailto:service@yihappy.com.tw">service@yihappy.com.tw</a></span></div>
+              </div>
+              <div className="map-frame">
+                <iframe
+                  loading="lazy"
+                  title="倚樂企業位置地圖"
+                  src="https://www.google.com/maps?q=新北市中和區中山路二段530號&output=embed"
+                ></iframe>
+              </div>
+            </div>
+
+            <form className="form" onSubmit={handleContactSubmit}>
+              <div className="field">
+                <label>姓名 · Name</label>
+                <input type="text" name="name" required placeholder="王小明" />
+              </div>
+              <div className="field">
+                <label>公司 · Company</label>
+                <input type="text" name="company" placeholder="貴公司或單位" />
+              </div>
+              <div className="field">
+                <label>電話 · Phone</label>
+                <input type="tel" name="phone" required placeholder="09XX-XXX-XXX" />
+              </div>
+              <div className="field">
+                <label>Email</label>
+                <input type="email" name="email" required placeholder="you@company.com" />
+              </div>
+              <div className="field full">
+                <label>需求服務 · Service</label>
+                <select name="service">
+                  <option>教科書印刷</option>
+                  <option>數位短版印刷</option>
+                  <option>精裝平裝書籍</option>
+                  <option>客製教具與教材</option>
+                  <option>企業形象印刷品</option>
+                  <option>客製化服務</option>
+                </select>
+              </div>
+              <div className="field full">
+                <label>需求描述 · Project Details</label>
+                <textarea name="message" required placeholder="尺寸、數量、紙張、裝幀方式、期望交期⋯⋯" rows="4"></textarea>
+              </div>
+              <div className="form-submit">
+                <span className="note">
+                  {formStatus === "sent"   ? "✅ 已收到！我們將於 1 工作日內回覆。" :
+                   formStatus === "error"  ? "⚠️ 送出失敗，請稍後再試。" :
+                   "提交後 1 工作日內回覆 · 報價單免費"}
+                </span>
+                <button type="submit" className="btn btn-primary" disabled={formStatus === "sending"}>
+                  {formStatus === "sending" ? "送出中..." : formStatus === "sent" ? "已送出 ✓" : <span>送出詢問 <span className="arr">→</span></span>}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="footer">
+        <div className="container">
+          <div className="footer-grid">
+            <div className="logo-block">
+              <div className="brand">
+                <div className="brand-mark"><img src="logo.svg" alt="倚樂 Yi Happy" style={{ filter: "brightness(0) invert(1)" }} /></div>
+                <div className="brand-name">
+                  <span className="zh" style={{ color: "var(--paper)" }}>企業有限公司</span>
+                  <span className="en">Yi Happy Co., Ltd.</span>
+                </div>
+              </div>
+              <p>自 2009 年起深耕教科書與精緻書籍印刷。以實在的品質與一站式服務，成為您長期信賴的印刷夥伴。</p>
+            </div>
+            <div className="col">
+              <h4>Services</h4>
+              <a href="#products">教科書印刷</a>
+              <a href="#products">數位短版印刷</a>
+              <a href="#products">精裝平裝書籍</a>
+              <a href="#products">客製教材</a>
+              <a href="#products">企業形象</a>
+            </div>
+            <div className="col">
+              <h4>Company</h4>
+              <a href="#about">關於我們</a>
+              <a href="#process">服務流程</a>
+              <a href="#why">為什麼選擇我們</a>
+              <a href="#contact">聯絡我們</a>
+            </div>
+            <div className="col">
+              <h4>Contact</h4>
+              <p>新北市中和區中山路二段 530 號 4 樓之一</p>
+              <p>02-22265720</p>
+              <p>service@yihappy.com.tw</p>
+            </div>
+          </div>
+          <div className="footer-bottom">
+            <div>© 2009–2026 Yi Happy Co., Ltd. All rights reserved.</div>
+            <div>Made with care in Zhonghe, Taiwan</div>
+          </div>
+        </div>
+      </footer>
+
+      {/* QUOTE TRAY */}
+      <div className={"quote-tray " + (trayHidden || quoteList.length === 0 ? "hidden" : "")}>
+        <span className="ct">{quoteList.length}</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 500 }}>{quoteList.length} 項服務已加入報價清單</div>
+          <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>滑至下方表單完成詢問</div>
+        </div>
+        <a href="#contact" className="btn btn-primary btn-sm" style={{ background: "var(--accent)" }}>查看 →</a>
+        <button className="x" onClick={() => setTrayHidden(true)}>×</button>
+      </div>
+
+      {/* MODAL */}
+      <div className={"modal-bg " + (modal ? "open" : "")} onClick={() => setModal(null)}>
+        {modal && (
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setModal(null)}>×</button>
+            <div className="img">
+              <div className="stripes"></div>
+              <div className="placeholder">{modal.glyph}</div>
+            </div>
+            <div className="content">
+              <div className="eyebrow">{modal.num} · Service</div>
+              <h3><span>{modal.en}</span><span className="han">{modal.zh}</span></h3>
+              <p className="modal-desc">{modal.desc}</p>
+              <div className="specs">
+                {modal.specs.map(([k, v], i) => (
+                  <React.Fragment key={i}>
+                    <div className="k">{k}</div>
+                    <div className="v">{v}</div>
+                  </React.Fragment>
+                ))}
+              </div>
+              <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+                <a href="#contact" className="btn btn-primary" onClick={() => setModal(null)}>立即詢價 <span className="arr">→</span></a>
+                <button className="btn btn-ghost" onClick={() => { toggleQuote(modal); setModal(null); }}>
+                  {quoteList.includes(modal.id) ? "✓ 已加入" : "+ 加入報價"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/69f77e2e82a2b91c3a630f9e/1jnnc9po0';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+
+<!-- 自訂離線 AI 助理彈窗 -->
+<div id="offline-chat-bubble" style="display:none; position:fixed; bottom:24px; right:24px; z-index:9999;">
+  <div id="bubble-btn" onclick="toggleOfflineChat()" style="
+    width:60px; height:60px; background:#1C1A17; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; box-shadow:0 4px 20px rgba(0,0,0,0.3);
+    transition:transform 0.2s;
+  " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+    </svg>
+  </div>
+  <div id="offline-chat-window" style="
+    display:none; position:absolute; bottom:70px; right:0;
+    width:300px; background:#1C1A17; border-radius:16px;
+    padding:20px; box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    color:white; font-family:sans-serif;
+  ">
+    <div style="font-size:15px; font-weight:600; margin-bottom:10px;">👋 您好！</div>
+    <div style="font-size:13px; line-height:1.6; color:#cdd8ec; margin-bottom:16px;">
+      目前客服團隊已下線。<br>
+      服務時間：<strong style="color:white">週一至週五 09:00–18:00</strong>。<br><br>
+      歡迎來信，我們將儘快回覆！
+    </div>
+    <a href="mailto:service@yihappy.com.tw?subject=網站詢問&body=您好，我想詢問關於…%0A%0A姓名：%0A聯絡方式：" style="
+      display:block; text-align:center; background:#CC0029;
+      color:white; text-decoration:none; padding:10px 16px;
+      border-radius:8px; font-size:13px; font-weight:600;
+    ">✉ 寄信給我們</a>
+  </div>
+</div>
+
+<script>
+function toggleOfflineChat() {
+  var win = document.getElementById('offline-chat-window');
+  win.style.display = win.style.display === 'none' ? 'block' : 'none';
+}
+Tawk_API.onStatusChange = function(status) {
+  var bubble = document.getElementById('offline-chat-bubble');
+  bubble.style.display = status === 'offline' ? 'block' : 'none';
+};
+Tawk_API.onLoad = function() {
+  if (Tawk_API.getStatus() === 'offline') {
+    document.getElementById('offline-chat-bubble').style.display = 'block';
+  }
+};
+</script>
+
+</body>
+</html>
