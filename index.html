@@ -507,28 +507,26 @@ function App() {
   const [lo, hi]  = priceBase[svc].map(v => Math.round(v * qty));
   const fmt = (n) => n.toLocaleString("en-US");
 
-  const handleContactSubmit = async (e) => {
+  const handleContactSubmit = (e) => {
     e.preventDefault();
-    setFormStatus("sending");
     const data = new FormData(e.target);
-    data.append("access_key",  "195eb9d9-0c69-416e-821b-e723e66f123a");
-    data.append("subject",     "【倚樂企業】新詢問 from yihappy.com.tw");
-    data.append("from_name",   "Yi Happy 網站表單");
-    try {
-      const res  = await fetch("https://api.web3forms.com/submit", { method: "POST", body: data });
-      const json = await res.json();
-      if (json.success) {
-        setFormStatus("sent");
-        e.target.reset();
-        setTimeout(() => setFormStatus("idle"), 6000);
-      } else {
-        setFormStatus("error");
-        setTimeout(() => setFormStatus("idle"), 4000);
-      }
-    } catch {
-      setFormStatus("error");
-      setTimeout(() => setFormStatus("idle"), 4000);
-    }
+    const body = [
+      "您好，我想詢問印刷服務：",
+      "",
+      `姓名：${data.get("name") || ""}`,
+      `公司：${data.get("company") || ""}`,
+      `電話：${data.get("phone") || ""}`,
+      `Email：${data.get("email") || ""}`,
+      `需求服務：${data.get("service") || ""}`,
+      "",
+      "需求描述：",
+      data.get("message") || ""
+    ].join("\n");
+
+    const subject = "【倚樂企業】網站詢問 from yihappy.com.tw";
+    window.location.href = `mailto:yihappy.dp@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setFormStatus("sent");
+    setTimeout(() => setFormStatus("idle"), 6000);
   };
 
   const tickerAll = [...TICKER_ITEMS, ...TICKER_ITEMS];
@@ -839,12 +837,12 @@ function App() {
               </div>
               <div className="form-submit">
                 <span className="note">
-                  {formStatus === "sent"   ? "✅ 已收到！我們將於 1 工作日內回覆。" :
+                  {formStatus === "sent"   ? "已開啟 Email 草稿，請確認後寄出。" :
                    formStatus === "error"  ? "⚠️ 送出失敗，請稍後再試。" :
-                   "提交後 1 工作日內回覆 · 報價單免費"}
+                   "送出後將開啟 Email 草稿 · 報價單免費"}
                 </span>
                 <button type="submit" className="btn btn-primary" disabled={formStatus === "sending"}>
-                  {formStatus === "sending" ? "送出中..." : formStatus === "sent" ? "已送出 ✓" : <span>送出詢問 <span className="arr">→</span></span>}
+                  {formStatus === "sending" ? "送出中..." : formStatus === "sent" ? "已開啟 ✓" : <span>送出詢問 <span className="arr">→</span></span>}
                 </button>
               </div>
             </form>
