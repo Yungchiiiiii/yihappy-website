@@ -77,10 +77,12 @@
       --accent-2:#B30024;
       --accent-soft: #F4D5DC;
 
-      --font-display:     "Times New Roman", Times, "Noto Serif TC", "Songti TC", "PMingLiU", "MingLiU", serif;
-      --font-han-display: "Noto Serif TC", "Songti TC", "PMingLiU", "MingLiU", serif;
-      --font-sans:        "Times New Roman", Times, "Noto Sans TC", "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
-      --font-mono:        "Times New Roman", Times, "Noto Sans TC", "PingFang TC", "Heiti TC", sans-serif;
+      --font-zh-title:    "Noto Serif TC", "Songti TC", "STSong", "PMingLiU", "MingLiU", serif;
+      --font-zh-body:     "Noto Sans TC", "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+      --font-display:     "Times New Roman", Times, var(--font-zh-title);
+      --font-han-display: var(--font-zh-title);
+      --font-sans:        "Times New Roman", Times, var(--font-zh-body);
+      --font-mono:        "Times New Roman", Times, var(--font-zh-body);
 
       --maxw:   1320px;
       --pad-x:  clamp(20px, 4vw, 64px);
@@ -120,6 +122,38 @@
     img { max-width: 100%; display: block; }
 
     .han { font-family: var(--font-han-display); }
+    .hero h1 .han,
+    .section-head h2 .han,
+    .product-card .body h3 .han,
+    .modal h3 .han,
+    .process-step h3,
+    .why-item h3 .han,
+    .quote-tool h2 .han,
+    .about-marks .n {
+      font-family: var(--font-zh-title);
+      font-weight: 500;
+    }
+    .nav-links a,
+    .btn,
+    .hero-sub,
+    .section-head .lede,
+    .about-body p,
+    .about-marks .l,
+    .product-card .body .desc,
+    .product-card .body .add,
+    .modal .modal-desc,
+    .modal .specs .v,
+    .process-step p,
+    .why-item p,
+    .qt-controls .opt,
+    .qt-result .price-note,
+    .contact-info .row .v,
+    .form-submit .note,
+    .footer .logo-block p,
+    .footer .col a,
+    .footer .col p {
+      font-family: var(--font-zh-body);
+    }
     .eyebrow {
       font-family: var(--font-mono);
       font-size: var(--t-eyebrow);
@@ -183,7 +217,7 @@
     .btn {
       display: inline-flex; align-items: center; gap: 10px;
       padding: 14px 24px; border-radius: 999px;
-      font-size: 14px; font-family: var(--font-sans); font-weight: 500;
+      font-size: 14px; font-family: var(--font-zh-body); font-weight: 500;
       letter-spacing: 0.02em; text-decoration: none;
       border: 1px solid transparent; cursor: pointer;
       transition: transform .25s ease, background .25s ease, color .25s ease, border-color .25s ease, box-shadow .25s ease;
@@ -284,7 +318,7 @@
     .product-card .body .desc { font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; }
     .product-card .body .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 16px; border-top: 1px solid var(--rule-soft); }
     .product-card .body .foot .meta { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; color: var(--ink-mute); text-transform: uppercase; }
-    .product-card .body .add { appearance: none; border: 0; background: transparent; font-family: var(--font-sans); font-size: 13px; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; transition: background .25s ease, color .25s ease; }
+    .product-card .body .add { appearance: none; border: 0; background: transparent; font-family: var(--font-zh-body); font-size: 13px; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; transition: background .25s ease, color .25s ease; }
     .product-card .body .add:hover { background: var(--ink); color: var(--paper); }
     .product-card .body .add .plus { font-size: 16px; line-height: 1; }
     .product-card .body .add.added { background: var(--accent); color: var(--paper); }
@@ -345,7 +379,7 @@
     .qt-controls .field label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(244,239,230,0.55); }
     .qt-controls .field { display: flex; flex-direction: column; gap: 12px; }
     .qt-controls .opts { display: flex; flex-wrap: wrap; gap: 8px; }
-    .qt-controls .opt { padding: 10px 18px; border: 1px solid rgba(244,239,230,0.2); border-radius: 999px; background: transparent; color: var(--paper); font-family: var(--font-sans); font-size: 13.5px; cursor: pointer; transition: background .25s ease, border-color .25s ease; }
+    .qt-controls .opt { padding: 10px 18px; border: 1px solid rgba(244,239,230,0.2); border-radius: 999px; background: transparent; color: var(--paper); font-family: var(--font-zh-body); font-size: 13.5px; cursor: pointer; transition: background .25s ease, border-color .25s ease; }
     .qt-controls .opt:hover { border-color: rgba(244,239,230,0.45); }
     .qt-controls .opt.active { background: var(--accent); border-color: var(--accent); }
     .qt-controls .qty { display: flex; align-items: center; gap: 18px; }
@@ -379,7 +413,7 @@
     .form .full { grid-column: 1 / -1; }
     .form .field { display: flex; flex-direction: column; gap: 8px; }
     .form label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); }
-    .form input, .form textarea, .form select { background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 10px 0; font-family: var(--font-sans); font-size: 15px; color: var(--ink); outline: none; transition: border-color .25s ease; }
+    .form input, .form textarea, .form select { background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 10px 0; font-family: var(--font-zh-body); font-size: 15px; color: var(--ink); outline: none; transition: border-color .25s ease; }
     .form input:focus, .form textarea:focus, .form select:focus { border-color: var(--ink); }
     .form textarea { resize: vertical; min-height: 90px; }
     .form select option { background: var(--paper-3); }
@@ -649,7 +683,7 @@ function App() {
       <nav className={"nav " + (scrolled ? "scrolled" : "")}>
         <a className="brand" href="#top" aria-label="倚樂首頁">
           <div className="brand-mark brand-mark--nav">
-            <img src="logo-new.png" alt="倚樂" width="1330" height="903" />
+            <img src="logo-new.png?v=pdf-logo-20260709" alt="倚樂" width="834" height="579" />
           </div>
         </a>
         <div className="nav-links">
@@ -966,7 +1000,7 @@ function App() {
           <div className="footer-grid">
             <div className="logo-block">
               <div className="footer-brand">
-                <img className="footer-logo" src="logo-new.png" alt="倚樂 CTP、依需印刷、數位直噴、平面設計" width="1330" height="903" />
+                <img className="footer-logo" src="logo-new.png?v=pdf-logo-20260709" alt="倚樂 CTP、依需印刷、數位直噴、平面設計" width="834" height="579" />
               </div>
               <p>自 2009 年起深耕教科書與精緻書籍印刷。以實在的品質與一站式服務，成為您長期信賴的印刷夥伴。</p>
             </div>
