@@ -84,10 +84,10 @@
       --font-sans:        "Times New Roman", Times, var(--font-zh-body);
       --font-mono:        "Times New Roman", Times, var(--font-zh-body);
 
-      --maxw:   1320px;
+      --maxw:   1720px;
       --pad-x:  clamp(20px, 4vw, 64px);
 
-      --t-display: clamp(56px, 8vw, 124px);
+      --t-display: clamp(54px, 5.7vw, 106px);
       --t-h1:   clamp(38px, 4.5vw, 64px);
       --t-h2:   clamp(28px, 3vw, 44px);
       --t-h3:   22px;
@@ -234,26 +234,27 @@
 
     /* Hero */
     .hero {
-      min-height: 100vh; padding-top: 140px; padding-bottom: 60px;
+      min-height: 100vh; padding-top: clamp(128px, 10vw, 168px); padding-bottom: clamp(56px, 6vw, 92px);
       display: flex; flex-direction: column; justify-content: space-between;
     }
-    .hero-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 60px; align-items: end; }
-    .hero h1 { font-family: var(--font-display); font-size: var(--t-display); line-height: 0.92; letter-spacing: -0.03em; font-weight: 400; }
-    .hero h1 .han { display: block; font-family: var(--font-han-display); font-size: 0.62em; letter-spacing: 0.02em; margin-top: 0.18em; color: var(--ink-2); }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(500px, 0.94fr); gap: clamp(56px, 6vw, 104px); align-items: center; }
+    .hero-copy { max-width: 760px; }
+    .hero h1 { font-family: var(--font-display); font-size: var(--t-display); line-height: 0.94; letter-spacing: -0.028em; font-weight: 400; }
+    .hero h1 .han { display: block; font-family: var(--font-han-display); font-size: 0.58em; line-height: 1.04; letter-spacing: 0.02em; margin-top: 0.2em; color: var(--ink-2); }
     .hero h1 .it { font-style: italic; color: var(--accent); }
-    .hero-sub { font-size: 18px; color: var(--ink-soft); max-width: 38ch; line-height: 1.55; margin-top: 24px; }
+    .hero-sub { font-size: clamp(16px, 1.05vw, 18px); color: var(--ink-soft); max-width: 38ch; line-height: 1.62; margin-top: 24px; }
     .hero-actions { display: flex; gap: 14px; margin-top: 36px; flex-wrap: wrap; }
     .hero-meta { display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; padding-top: 32px; margin-top: 60px; border-top: 1px solid var(--rule); }
     .hero-meta .stat .n { font-family: var(--font-display); font-size: 56px; line-height: 1; letter-spacing: -0.03em; }
     .hero-meta .stat .n sup { font-size: 18px; font-family: var(--font-mono); color: var(--ink-mute); margin-left: 6px; vertical-align: top; top: 0.4em; position: relative; }
     .hero-meta .stat .l { font-size: 13px; color: var(--ink-soft); margin-top: 8px; letter-spacing: 0.04em; }
 
-    .hero-figure { position: relative; aspect-ratio: 4/5; background: var(--paper-2); overflow: hidden; border-radius: 2px; }
+    .hero-figure { position: relative; aspect-ratio: 4/5; width: min(100%, 760px); justify-self: end; background: var(--paper-2); overflow: hidden; border-radius: 2px; }
     .hero-figure .label { position: absolute; left: 16px; bottom: 14px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28,26,23,0.55); }
     .hero-figure .stripes { position: absolute; inset: 0; background-image: repeating-linear-gradient(135deg, rgba(28,26,23,0.05) 0 2px, transparent 2px 14px); }
-    .hero-figure .ink-block { position: absolute; left: 12%; right: 12%; top: 18%; bottom: 22%; background: var(--ink); color: var(--paper); padding: 28px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 18px 18px 0 var(--accent); }
+    .hero-figure .ink-block { position: absolute; left: 12%; right: 12%; top: 18%; bottom: 22%; background: var(--ink); color: var(--paper); padding: clamp(22px, 2vw, 34px); display: flex; flex-direction: column; justify-content: space-between; box-shadow: clamp(14px, 1.4vw, 22px) clamp(14px, 1.4vw, 22px) 0 var(--accent); }
     .hero-figure .ink-block .num { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(244,239,230,0.6); }
-    .hero-figure .ink-block .ti { font-family: var(--font-display); font-style: italic; font-size: 42px; line-height: 1.05; }
+    .hero-figure .ink-block .ti { font-family: var(--font-display); font-style: italic; font-size: clamp(36px, 3vw, 50px); line-height: 1.05; }
     .hero-figure .ink-block .ti .sub { display: block; font-family: var(--font-han-display); font-style: normal; font-size: 14px; color: rgba(244,239,230,0.65); margin-top: 12px; letter-spacing: 0.08em; }
 
     /* Ticker */
@@ -265,6 +266,7 @@
 
     /* Section heads */
     .section-head { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: end; margin-bottom: 64px; }
+    .section-head--solo { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
     .section-head h2 { font-family: var(--font-display); font-size: var(--t-h1); line-height: 1; letter-spacing: -0.025em; font-weight: 400; }
     .section-head h2 .han { display: block; font-family: var(--font-han-display); font-size: 0.5em; margin-top: 0.2em; color: var(--ink-2); letter-spacing: 0.02em; }
     .section-head .lede { font-size: 17px; color: var(--ink-soft); max-width: 46ch; line-height: 1.65; }
@@ -699,7 +701,7 @@ function App() {
       {/* HERO */}
       <section className="hero container" id="top">
         <div className="hero-grid">
-          <div>
+          <div className="hero-copy">
             <span className="eyebrow">Since 2009 · 新北中和</span>
             <h1 style={{ marginTop: 24 }}>
               Pages that <span className="it">last</span>,<br />
@@ -731,7 +733,7 @@ function App() {
 
         <div className="hero-meta">
           <div className="stat"><div className="n">17<sup>YRS</sup></div><div className="l">深耕印刷產業</div></div>
-          <div className="stat"><div className="n">100<sup>+</sup></div><div className="l">長期合作客戶</div></div>
+          <div className="stat"><div className="n">高效<sup>交貨</sup></div><div className="l">輪轉機支援快速量產</div></div>
           <div className="stat"><div className="n">6<sup>項</sup></div><div className="l">主要印刷服務範疇</div></div>
         </div>
 
@@ -746,12 +748,8 @@ function App() {
 
       {/* ABOUT */}
       <section id="about" className="container">
-        <div className="section-head reveal">
+        <div className="section-head section-head--solo reveal">
           <h2>About <span className="serif">us</span><span className="han">關於倚樂</span></h2>
-          <p className="lede">
-            自 2009 年於新北中和創立，倚樂企業專注於教科書與精緻書籍印刷。
-            我們相信，好的印刷不只是把油墨壓在紙上，而是讓知識、品牌、情感得以被妥善保存與傳遞。
-          </p>
         </div>
         <div className="about-grid">
           <div className="about-figure reveal">
@@ -765,12 +763,13 @@ function App() {
               以誠心對待每一位客戶。」
             </p>
             <p>
-              從教科書到藝術書、從萬本量產到單冊收藏，我們以一致的標準把關每一道工序。
-              裝幀、色彩、紙張的選擇都有師傅實際把關，讓成品經得起時間的考驗。
+              自 2009 年於新北中和創立以來，我們專注於教科書與精緻書籍印刷。
+              從教科書到藝術書、從萬本量產到單冊收藏，我們以一致的標準把關每一道工序，
+              讓知識、品牌與情感被妥善保存並傳遞。
             </p>
             <p>
-              我們的廠區位於新北中和，自有印刷、裝訂、後加工全產線。從打樣到出貨，
-              一條龍服務讓您能直接與印務、裝幀師傅溝通，避免層層轉手帶來的延誤與誤差。
+              我們的廠區位於新北中和，自有印刷、輪轉機、裝訂與後加工全產線。從打樣到出貨，
+              一條龍服務讓您能直接與印務、裝幀師傅溝通，交期掌握更快，也避免層層轉手帶來的延誤與誤差。
             </p>
             <div className="about-marks">
               <div><div className="k">01</div><div className="n">一條龍</div><div className="l">自有印製與後加工產線</div></div>
