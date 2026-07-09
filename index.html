@@ -160,6 +160,11 @@
     .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink); }
     .brand-mark { height: 32px; width: auto; display: flex; align-items: center; }
     .brand-mark img { height: 100%; width: auto; display: block; }
+    .brand-mark--nav {
+      height: 58px;
+      transition: height .3s ease;
+    }
+    .nav.scrolled .brand-mark--nav { height: 48px; }
     .brand-name { display: flex; flex-direction: column; line-height: 1.1; }
     .brand-name .zh { font-family: var(--font-han-display); font-size: 16px; letter-spacing: 0.06em; }
     .brand-name .en { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; color: var(--ink-soft); text-transform: uppercase; }
@@ -402,6 +407,8 @@
     }
     @media (max-width: 640px) {
       .nav-links { display: none; }
+      .brand-mark--nav { height: 50px; }
+      .nav.scrolled .brand-mark--nav { height: 44px; }
       .product-grid { grid-template-columns: 1fr; }
       .process-grid { grid-template-columns: 1fr; }
       .hero h1 { line-height: 1; }
@@ -535,11 +542,9 @@ function App() {
     <div>
       {/* NAV */}
       <nav className={"nav " + (scrolled ? "scrolled" : "")}>
-        <a className="brand" href="#top">
-          <div className="brand-mark"><img src="logo.svg" alt="倚樂 Yi Happy" /></div>
-          <div className="brand-name">
-            <span className="zh">企業有限公司</span>
-            <span className="en">Yi Happy Co., Ltd. · Est. 2009</span>
+        <a className="brand" href="#top" aria-label="倚樂首頁">
+          <div className="brand-mark brand-mark--nav">
+            <img src="logo-new.png" alt="倚樂" width="1330" height="903" />
           </div>
         </a>
         <div className="nav-links">
