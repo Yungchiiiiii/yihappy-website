@@ -161,10 +161,10 @@
     .brand-mark { height: 32px; width: auto; display: flex; align-items: center; }
     .brand-mark img { height: 100%; width: auto; display: block; }
     .brand-mark--nav {
-      height: clamp(72px, 7vw, 88px);
+      height: clamp(76px, 7.5vw, 96px);
       transition: height .3s ease;
     }
-    .nav.scrolled .brand-mark--nav { height: clamp(60px, 5.5vw, 72px); }
+    .nav.scrolled .brand-mark--nav { height: clamp(64px, 6vw, 78px); }
     .brand-name { display: flex; flex-direction: column; line-height: 1.1; }
     .brand-name .zh { font-family: var(--font-han-display); font-size: 16px; letter-spacing: 0.06em; }
     .brand-name .en { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; color: var(--ink-soft); text-transform: uppercase; }
@@ -409,8 +409,8 @@
       .nav-links { display: none; }
     }
     @media (max-width: 640px) {
-      .brand-mark--nav { height: clamp(56px, 15vw, 64px); }
-      .nav.scrolled .brand-mark--nav { height: clamp(50px, 13vw, 56px); }
+      .brand-mark--nav { height: clamp(60px, 16vw, 68px); }
+      .nav.scrolled .brand-mark--nav { height: clamp(52px, 14vw, 60px); }
       .product-grid { grid-template-columns: 1fr; }
       .process-grid { grid-template-columns: 1fr; }
       .hero h1 { line-height: 1; }
