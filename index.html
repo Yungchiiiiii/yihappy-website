@@ -77,10 +77,10 @@
       --accent-2:#B30024;
       --accent-soft: #F4D5DC;
 
-      --font-display:     "Times New Roman", Times, "Noto Serif TC", serif;
-      --font-han-display: "Noto Serif TC", "PingFang TC", serif;
-      --font-sans:        "Times New Roman", Times, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", serif;
-      --font-mono:        "Times New Roman", Times, "Noto Sans TC", serif;
+      --font-display:     "Times New Roman", Times, "Noto Serif TC", "Songti TC", "PMingLiU", "MingLiU", serif;
+      --font-han-display: "Noto Serif TC", "Songti TC", "PMingLiU", "MingLiU", serif;
+      --font-sans:        "Times New Roman", Times, "Noto Sans TC", "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+      --font-mono:        "Times New Roman", Times, "Noto Sans TC", "PingFang TC", "Heiti TC", sans-serif;
 
       --maxw:   1320px;
       --pad-x:  clamp(20px, 4vw, 64px);
@@ -276,7 +276,7 @@
     .product-card .thumb .placeholder { position: absolute; inset: 20% 16%; background: var(--ink); display: grid; place-items: center; color: var(--paper); transition: transform .6s cubic-bezier(.6,.1,.2,1); }
     .product-card:hover .thumb .placeholder { transform: scale(1.04); }
     .service-icon { width: 58%; max-width: 180px; height: auto; overflow: visible; }
-    .service-icon .fine { opacity: 0.42; }
+    .service-icon .fine { opacity: 0.56; }
     .product-card .thumb .label-tag { position: absolute; bottom: 14px; right: 14px; font-family: var(--font-mono); font-size: 10px; color: rgba(28,26,23,0.45); text-transform: uppercase; letter-spacing: 0.1em; }
     .product-card .body { padding: 28px 24px 24px; display: flex; flex-direction: column; gap: 12px; }
     .product-card .body h3 { font-family: var(--font-display); font-size: 28px; line-height: 1.15; letter-spacing: -0.01em; }
@@ -389,7 +389,9 @@
     /* Footer */
     .footer { background: var(--ink); color: var(--paper); padding: 80px 0 32px; position: relative; z-index: 2; }
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; padding-bottom: 60px; border-bottom: 1px solid rgba(244,239,230,0.12); }
-    .footer .logo-block { display: flex; flex-direction: column; gap: 20px; max-width: 320px; }
+    .footer .logo-block { display: flex; flex-direction: column; gap: 20px; max-width: 380px; }
+    .footer .footer-brand { display: inline-flex; align-items: center; width: fit-content; }
+    .footer .footer-logo { width: clamp(168px, 18vw, 238px); height: auto; filter: none; }
     .footer .logo-block .brand-name .en { color: rgba(244,239,230,0.5); }
     .footer .logo-block p { font-size: 14px; color: rgba(244,239,230,0.6); line-height: 1.7; }
     .footer .col h4 { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(244,239,230,0.5); margin-bottom: 18px; }
@@ -496,7 +498,7 @@ function ServiceIcon({ type, label }) {
       <g
         fill="none"
         stroke="currentColor"
-        strokeWidth="2.2"
+        strokeWidth="3.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -963,12 +965,8 @@ function App() {
         <div className="container">
           <div className="footer-grid">
             <div className="logo-block">
-              <div className="brand">
-                <div className="brand-mark"><img src="logo.svg" alt="倚樂 Yi Happy" style={{ filter: "brightness(0) invert(1)" }} /></div>
-                <div className="brand-name">
-                  <span className="zh" style={{ color: "var(--paper)" }}>企業有限公司</span>
-                  <span className="en">Yi Happy Co., Ltd.</span>
-                </div>
+              <div className="footer-brand">
+                <img className="footer-logo" src="logo-new.png" alt="倚樂 CTP、依需印刷、數位直噴、平面設計" width="1330" height="903" />
               </div>
               <p>自 2009 年起深耕教科書與精緻書籍印刷。以實在的品質與一站式服務，成為您長期信賴的印刷夥伴。</p>
             </div>
