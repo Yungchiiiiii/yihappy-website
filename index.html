@@ -58,7 +58,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <style>
     /* Yi Happy — minimalist elegant printing co. */
@@ -77,10 +77,10 @@
       --accent-2:#B30024;
       --accent-soft: #F4D5DC;
 
-      --font-display:     "Cormorant Garamond", "Noto Serif TC", serif;
+      --font-display:     "Times New Roman", Times, "Noto Serif TC", serif;
       --font-han-display: "Noto Serif TC", "PingFang TC", serif;
-      --font-sans:        "DM Sans", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
-      --font-mono:        "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      --font-sans:        "Times New Roman", Times, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", serif;
+      --font-mono:        "Times New Roman", Times, "Noto Sans TC", serif;
 
       --maxw:   1320px;
       --pad-x:  clamp(20px, 4vw, 64px);
@@ -171,7 +171,7 @@
 
     .nav-links {
       display: flex; gap: 32px; align-items: center;
-      margin-left: clamp(48px, 4.5vw, 64px);
+      margin-left: clamp(18px, 1.6vw, 24px);
     }
     .nav > .btn { margin-left: auto; }
     .nav-links a { font-size: 14px; color: var(--ink); text-decoration: none; position: relative; padding: 6px 0; }
@@ -273,8 +273,10 @@
     .product-card .thumb { aspect-ratio: 4/3; background: var(--paper-2); position: relative; overflow: hidden; }
     .product-card .thumb .stripes { position: absolute; inset: 0; background-image: repeating-linear-gradient(45deg, rgba(28,26,23,0.05) 0 2px, transparent 2px 12px); }
     .product-card .thumb .num { position: absolute; top: 16px; left: 16px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; color: var(--ink-soft); }
-    .product-card .thumb .placeholder { position: absolute; inset: 20% 16%; background: var(--ink); display: grid; place-items: center; font-family: var(--font-display); font-style: italic; color: var(--paper); font-size: 38px; transition: transform .6s cubic-bezier(.6,.1,.2,1); }
+    .product-card .thumb .placeholder { position: absolute; inset: 20% 16%; background: var(--ink); display: grid; place-items: center; color: var(--paper); transition: transform .6s cubic-bezier(.6,.1,.2,1); }
     .product-card:hover .thumb .placeholder { transform: scale(1.04); }
+    .service-icon { width: 58%; max-width: 180px; height: auto; overflow: visible; }
+    .service-icon .fine { opacity: 0.42; }
     .product-card .thumb .label-tag { position: absolute; bottom: 14px; right: 14px; font-family: var(--font-mono); font-size: 10px; color: rgba(28,26,23,0.45); text-transform: uppercase; letter-spacing: 0.1em; }
     .product-card .body { padding: 28px 24px 24px; display: flex; flex-direction: column; gap: 12px; }
     .product-card .body h3 { font-family: var(--font-display); font-size: 28px; line-height: 1.15; letter-spacing: -0.01em; }
@@ -300,7 +302,8 @@
     .modal-bg.open .modal { transform: translateY(0) scale(1); }
     .modal .img { background: var(--paper-2); position: relative; min-height: 320px; }
     .modal .img .stripes { position: absolute; inset: 0; background-image: repeating-linear-gradient(45deg, rgba(28,26,23,0.05) 0 2px, transparent 2px 12px); }
-    .modal .img .placeholder { position: absolute; inset: 12% 10%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-family: var(--font-display); font-style: italic; font-size: 60px; }
+    .modal .img .placeholder { position: absolute; inset: 12% 10%; background: var(--ink); color: var(--paper); display: grid; place-items: center; }
+    .modal .img .service-icon { width: 54%; max-width: 250px; }
     .modal .content { padding: 44px 40px; display: flex; flex-direction: column; gap: 18px; }
     .modal h3 { font-family: var(--font-display); font-size: 38px; line-height: 1.1; }
     .modal h3 .han { display: block; font-family: var(--font-han-display); font-size: 0.55em; color: var(--ink-soft); margin-top: 6px; }
@@ -435,22 +438,22 @@
 const { useState, useEffect } = React;
 
 const PRODUCTS = [
-  { id:"textbook",  en:"Textbook Printing",     zh:"教科書印刷",     glyph:"T", num:"01",
+  { id:"textbook",  en:"Textbook Printing",     zh:"教科書印刷",     num:"01",
     desc:"從中小學教材到大學教科書，精準色彩、穩定品質與大量交期。專為出版社與教育機構量身打造。",
     specs:[["紙張 Paper","70–120gsm 道林 / 雪銅"],["裝訂 Binding","膠裝 / 騎馬釘 / 穿線"],["色彩 Color","CMYK 四色 / 黑白"],["最小量 MOQ","500 冊起"]] },
-  { id:"digital",   en:"Digital Short-Run",     zh:"數位短版印刷",   glyph:"D", num:"02",
+  { id:"digital",   en:"Digital Short-Run",     zh:"數位短版印刷",   num:"02",
     desc:"少量多樣、隨需印製。從 1 本到 500 本皆可，適合樣書、提案、新品試銷與限定版書籍。",
     specs:[["起印量 MOQ","1 本起印"],["交期 Lead Time","視專案需求而定"],["色彩 Color","高精度數位 CMYK"],["後加工 Finish","燙金 / 打凹 / UV"]] },
-  { id:"hardcover", en:"Hardcover & Softcover", zh:"精裝平裝書籍",   glyph:"H", num:"03",
+  { id:"hardcover", en:"Hardcover & Softcover", zh:"精裝平裝書籍",   num:"03",
     desc:"工藝級裝幀。布面、紙面、燙金、刷邊、書套、軋型⸺收藏級的細節，由倚樂職人逐冊把關。",
     specs:[["裝幀 Binding","穿線 / 圓背 / 方背"],["封面 Cover","布面 / 進口紙 / 燙金"],["內頁 Pages","32–768 頁"],["特殊 Special","刷邊、書匣、書腰"]] },
-  { id:"education", en:"Educational Materials",  zh:"客製教具與教材",  glyph:"E", num:"04",
+  { id:"education", en:"Educational Materials",  zh:"客製教具與教材",  num:"04",
     desc:"學習單、字卡、評量本、實作手冊。為教師與教育品牌提供從設計建議到生產的一站式服務。",
     specs:[["形式 Format","活頁 / 線圈 / 卡盒"],["材質 Material","白卡 / 銅版 / PP"],["後加工 Finish","圓角 / 軋型 / 模切"],["客製 Custom","套組包裝、貼紙"]] },
-  { id:"corporate", en:"Corporate Identity",    zh:"企業形象印刷品",  glyph:"C", num:"05",
+  { id:"corporate", en:"Corporate Identity",    zh:"企業形象印刷品",  num:"05",
     desc:"年報、品牌書、提案冊、邀請函。以印刷工藝深化品牌語言，呈現企業氣質與專業度。",
     specs:[["項目 Items","年報 / 品牌書 / 簡介"],["紙張 Paper","特殊進口紙、再生紙"],["工藝 Craft","燙金、打凹、UV、過油"],["設計協助 Design","可協同設計團隊"]] },
-  { id:"custom",    en:"Custom Solutions",       zh:"客製化印刷服務",  glyph:"X", num:"06",
+  { id:"custom",    en:"Custom Solutions",       zh:"客製化印刷服務",  num:"06",
     desc:"走出規格表的需求⸺特殊尺寸、限量收藏品、藝術書、實驗性裝幀。歡迎帶著你的想法來找我們。",
     specs:[["尺寸 Size","任意客製"],["材質 Material","紙、布、皮、金屬"],["數量 Run","1 本至無限"],["合作 Work","從打樣到量產"]] }
 ];
@@ -481,6 +484,100 @@ const TICKER_ITEMS = [
   "企業形象", "Corporate Identity",
   "客製化", "Custom Solutions"
 ];
+
+function ServiceIcon({ type, label }) {
+  const frame = (content) => (
+    <svg
+      className="service-icon"
+      viewBox="0 0 160 120"
+      role="img"
+      aria-label={`${label} 線條圖示`}
+    >
+      <g
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {content}
+      </g>
+    </svg>
+  );
+
+  switch (type) {
+    case "textbook":
+      return frame(
+        <>
+          <path d="M18 31c20-7 41-3 62 11v55c-20-13-41-17-62-10z" />
+          <path d="M142 31c-20-7-41-3-62 11v55c20-13 41-17 62-10z" />
+          <path d="M80 42v55" />
+          <path className="fine" d="M31 47c13-2 25 1 36 7M31 59c13-1 25 2 36 8M129 47c-13-2-25 1-36 7M129 59c-13-1-25 2-36 8" />
+        </>
+      );
+    case "digital":
+      return frame(
+        <>
+          <path d="M43 17h70v31H43z" />
+          <path d="M30 45h97c7 0 12 5 12 12v31h-24" />
+          <path d="M45 88H21V57c0-7 5-12 12-12" />
+          <path d="M45 72h70v32H45z" />
+          <path className="fine" d="M57 84h45M57 93h34" />
+          <circle cx="123" cy="59" r="2.5" />
+          <path d="M27 99h10M32 94v10M123 25h13M129.5 18.5v13" />
+        </>
+      );
+    case "hardcover":
+      return frame(
+        <>
+          <path d="M25 25h53v75H25c-5 0-9-4-9-9V34c0-5 4-9 9-9z" />
+          <path d="M29 25v75M42 39h24" />
+          <path d="M92 32c19-6 36-3 52 8v64c-15-10-32-13-52-7z" />
+          <path d="M92 32v65" />
+          <path className="fine" d="M104 49c10-2 19 0 28 4M104 60c10-1 19 1 28 5" />
+        </>
+      );
+    case "education":
+      return frame(
+        <>
+          <rect x="18" y="25" width="82" height="68" rx="3" />
+          <path d="M36 25v-9h86v68h-22" />
+          <circle cx="43" cy="50" r="11" />
+          <path d="m75 39 13 22H62z" />
+          <rect x="37" y="72" width="19" height="10" rx="2" />
+          <path className="fine" d="M66 75h20M109 31h6M109 43h6M109 55h6" />
+          <path d="m112 91 7 7 17-19" />
+        </>
+      );
+    case "corporate":
+      return frame(
+        <>
+          <path d="M34 18h68l19 19v65H34z" />
+          <path d="M102 18v19h19" />
+          <circle cx="58" cy="48" r="9" />
+          <path className="fine" d="M76 44h27M76 52h20M48 68h58M48 77h43" />
+          <rect x="71" y="82" width="67" height="28" rx="2" />
+          <path d="M80 91h13M80 99h23" />
+          <circle cx="123" cy="96" r="6" />
+        </>
+      );
+    case "custom":
+      return frame(
+        <>
+          <path d="M18 42V20h22M120 20h22v22M142 80v22h-22M40 102H18V80" />
+          <circle cx="55" cy="52" r="16" />
+          <rect x="86" y="36" width="31" height="31" rx="3" />
+          <path d="m63 88 16-27 16 27z" />
+          <path className="fine" d="M32 78 50 64M108 78l18-14M73 35l8-13" />
+          <circle cx="32" cy="78" r="3" />
+          <circle cx="126" cy="64" r="3" />
+          <circle cx="81" cy="22" r="3" />
+        </>
+      );
+    default:
+      return null;
+  }
+}
 
 function App() {
   const [scrolled,    setScrolled]   = useState(false);
@@ -679,8 +776,8 @@ function App() {
                 <div className="thumb">
                   <div className="stripes"></div>
                   <div className="num">{p.num}</div>
-                  <div className="placeholder">{p.glyph}</div>
-                  <div className="label-tag">[ product shot ]</div>
+                  <div className="placeholder"><ServiceIcon type={p.id} label={p.en} /></div>
+                  <div className="label-tag">[ service mark ]</div>
                 </div>
                 <div className="body">
                   <h3><span>{p.en}</span><span className="han">{p.zh}</span></h3>
@@ -922,7 +1019,7 @@ function App() {
             <button className="modal-close" onClick={() => setModal(null)}>×</button>
             <div className="img">
               <div className="stripes"></div>
-              <div className="placeholder">{modal.glyph}</div>
+              <div className="placeholder"><ServiceIcon type={modal.id} label={modal.en} /></div>
             </div>
             <div className="content">
               <div className="eyebrow">{modal.num} · Service</div>
