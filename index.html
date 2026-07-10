@@ -48,7 +48,6 @@
         {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "教科書印刷 Textbook Printing"}},
         {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "數位短版印刷 Digital Short-Run"}},
         {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "精裝平裝書籍 Hardcover & Softcover"}},
-        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "客製教具與教材 Educational Materials"}},
         {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "企業形象印刷品 Corporate Identity"}},
         {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "客製化印刷服務 Custom Solutions"}}
       ]
@@ -478,22 +477,19 @@ const { useState, useEffect } = React;
 const PRODUCTS = [
   { id:"textbook",  en:"Textbook Printing",     zh:"教科書印刷",     num:"01",
     desc:"從中小學教材到大學教科書，精準色彩、穩定品質與大量交期。專為出版社與教育機構量身打造。",
-    specs:[["紙張 Paper","70–120gsm 道林 / 雪銅"],["裝訂 Binding","膠裝 / 騎馬釘 / 穿線"],["色彩 Color","CMYK 四色 / 黑白"],["最小量 MOQ","500 冊起"]] },
+    specs:[["紙張 Paper","依客戶需求"],["裝訂 Binding","膠裝 / 騎馬釘 / 穿線"],["色彩 Color","CMYK 四色 / 黑白"],["最小量 MOQ","10 冊起"]] },
   { id:"digital",   en:"Digital Short-Run",     zh:"數位短版印刷",   num:"02",
-    desc:"少量多樣、隨需印製。從 1 本到 500 本皆可，適合樣書、提案、新品試銷與限定版書籍。",
-    specs:[["起印量 MOQ","1 本起印"],["交期 Lead Time","視專案需求而定"],["色彩 Color","高精度數位 CMYK"],["後加工 Finish","燙金 / 打凹 / UV"]] },
+    desc:"少量多樣、隨需印製。從 2 本起印，適合樣書、提案、新品試銷與限定版書籍。",
+    specs:[["起印量 MOQ","2 本起印"],["交期 Lead Time","視專案需求而定"],["色彩 Color","高精度數位 CMYK / 黑白"],["後加工 Finish","上膜 / 局部光 / 燙金 / 打凹 / UV"]] },
   { id:"hardcover", en:"Hardcover & Softcover", zh:"精裝平裝書籍",   num:"03",
     desc:"工藝級裝幀。布面、紙面、燙金、刷邊、書套、軋型⸺收藏級的細節，由倚樂職人逐冊把關。",
-    specs:[["裝幀 Binding","穿線 / 圓背 / 方背"],["封面 Cover","布面 / 進口紙 / 燙金"],["內頁 Pages","32–768 頁"],["特殊 Special","刷邊、書匣、書腰"]] },
-  { id:"education", en:"Educational Materials",  zh:"客製教具與教材",  num:"04",
-    desc:"學習單、字卡、評量本、實作手冊。為教師與教育品牌提供從設計建議到生產的一站式服務。",
-    specs:[["形式 Format","活頁 / 線圈 / 卡盒"],["材質 Material","白卡 / 銅版 / PP"],["後加工 Finish","圓角 / 軋型 / 模切"],["客製 Custom","套組包裝、貼紙"]] },
-  { id:"corporate", en:"Corporate Identity",    zh:"企業形象印刷品",  num:"05",
+    specs:[["裝幀 Binding","穿線 / 圓背 / 方背"],["封面 Cover","布面 / 進口紙 / 燙金"],["內頁 Pages","32~1312 頁"],["特殊 Special","刷邊、書匣、書腰"]] },
+  { id:"corporate", en:"Corporate Identity",    zh:"企業形象印刷品",  num:"04",
     desc:"年報、品牌書、提案冊、邀請函。以印刷工藝深化品牌語言，呈現企業氣質與專業度。",
     specs:[["項目 Items","年報 / 品牌書 / 簡介"],["紙張 Paper","特殊進口紙、再生紙"],["工藝 Craft","燙金、打凹、UV、過油"],["設計協助 Design","可協同設計團隊"]] },
-  { id:"custom",    en:"Custom Solutions",       zh:"客製化印刷服務",  num:"06",
+  { id:"custom",    en:"Custom Solutions",       zh:"客製化印刷服務",  num:"05",
     desc:"走出規格表的需求⸺特殊尺寸、限量收藏品、藝術書、實驗性裝幀。歡迎帶著你的想法來找我們。",
-    specs:[["尺寸 Size","任意客製"],["材質 Material","紙、布、皮、金屬"],["數量 Run","1 本至無限"],["合作 Work","從打樣到量產"]] }
+    specs:[["尺寸 Size","任意客製"],["材質 Material","任意客製"],["數量 Run","2 本至無上限"],["合作 Work","從打樣到量產"]] }
 ];
 
 const PROCESS = [
@@ -575,18 +571,6 @@ function ServiceIcon({ type, label }) {
           <path className="fine" d="M104 49c10-2 19 0 28 4M104 60c10-1 19 1 28 5" />
         </>
       );
-    case "education":
-      return frame(
-        <>
-          <rect x="18" y="25" width="82" height="68" rx="3" />
-          <path d="M36 25v-9h86v68h-22" />
-          <circle cx="43" cy="50" r="11" />
-          <path d="m75 39 13 22H62z" />
-          <rect x="37" y="72" width="19" height="10" rx="2" />
-          <path className="fine" d="M66 75h20M109 31h6M109 43h6M109 55h6" />
-          <path d="m112 91 7 7 17-19" />
-        </>
-      );
     case "corporate":
       return frame(
         <>
@@ -651,7 +635,7 @@ function App() {
     });
   };
 
-  const priceBase = { textbook:[12,24], digital:[28,60], hardcover:[180,420], education:[18,38], corporate:[60,180], custom:[80,240] };
+  const priceBase = { textbook:[12,24], digital:[28,60], hardcover:[180,420], corporate:[60,180], custom:[80,240] };
   const [lo, hi]  = priceBase[svc].map(v => Math.round(v * qty));
   const fmt = (n) => n.toLocaleString("en-US");
 
@@ -732,9 +716,9 @@ function App() {
         </div>
 
         <div className="hero-meta">
-          <div className="stat"><div className="n">17<sup>YRS</sup></div><div className="l">深耕印刷產業</div></div>
+          <div className="stat"><div className="n">24<sup>YRS</sup></div><div className="l">深耕印刷產業</div></div>
           <div className="stat"><div className="n">高效<sup>交貨</sup></div><div className="l">輪轉機支援快速量產</div></div>
-          <div className="stat"><div className="n">6<sup>項</sup></div><div className="l">主要印刷服務範疇</div></div>
+          <div className="stat"><div className="n">5<sup>項</sup></div><div className="l">主要印刷服務範疇</div></div>
         </div>
 
         <div className="ticker">
@@ -786,7 +770,7 @@ function App() {
           <div className="section-head reveal">
             <h2>Our <span className="serif">services</span><span className="han">我們的印刷服務</span></h2>
             <p className="lede">
-              從教科書、精裝書到企業形象印刷品，六大服務範疇皆由廠內職人團隊全程把關。
+              從教科書、精裝書到企業形象印刷品，五大服務範疇皆由廠內職人團隊全程把關。
               點選卡片查看細節，或加入報價清單。
             </p>
           </div>
@@ -969,7 +953,6 @@ function App() {
                   <option>教科書印刷</option>
                   <option>數位短版印刷</option>
                   <option>精裝平裝書籍</option>
-                  <option>客製教具與教材</option>
                   <option>企業形象印刷品</option>
                   <option>客製化服務</option>
                 </select>
@@ -1008,8 +991,8 @@ function App() {
               <a href="#products">教科書印刷</a>
               <a href="#products">數位短版印刷</a>
               <a href="#products">精裝平裝書籍</a>
-              <a href="#products">客製教材</a>
               <a href="#products">企業形象</a>
+              <a href="#products">客製化服務</a>
             </div>
             <div className="col">
               <h4>Company</h4>
