@@ -612,7 +612,7 @@ function App() {
   const [svc,         setSvc]        = useState("textbook");
   const [colorMode,   setColorMode]  = useState("color");
   const [pages,       setPages]      = useState(128);
-  const [qty,         setQty]        = useState(500);
+  const [qty,         setQty]        = useState(10);
   const [formStatus,  setFormStatus] = useState("idle");
 
   useEffect(() => {
@@ -640,8 +640,8 @@ function App() {
     });
   };
 
-  const pageRate = colorMode === "bw" ? 0.25 : 1;
-  const estimatedPrice = Math.round((pages * pageRate + 25) * qty);
+  const pageRateRange = colorMode === "bw" ? [0.25, 0.35] : [1, 1.8];
+  const [lo, hi] = pageRateRange.map((rate) => Math.round((pages * rate + 25) * qty));
   const fmt = (n) => n.toLocaleString("en-US");
 
   const handleContactSubmit = (e) => {
@@ -908,18 +908,18 @@ function App() {
               <div className="field">
                 <label>數量 · Quantity (本 / Copies)</label>
                 <div className="qty">
-                  <input type="range" min="50" max="10000" step="50" value={qty} onChange={e => setQty(+e.target.value)} />
+                  <input type="range" min="10" max="10000" step="10" value={qty} onChange={e => setQty(+e.target.value)} />
                   <span className="v">{fmt(qty)}</span>
                 </div>
               </div>
             </div>
             <div className="qt-result">
-              <div className="lbl">預估價格 · Estimated Price</div>
+              <div className="lbl">預估價格區間 · Estimated Range</div>
               <div className="price">
-                <span className="currency">NT$</span>{fmt(estimatedPrice)}
+                <span className="currency">NT$</span>{fmt(lo)}<span className="dash">—</span>{fmt(hi)}
               </div>
               <p className="price-note">
-                此為線上速算僅供參考。每本加計 25 元成書費，實際報價將依紙張、後加工、裝幀方式調整。
+                此為線上速算僅供參考。彩色每面 NT$1–1.8，黑白每面 NT$0.25–0.35，每本加計 25 元成書費。
                 完成詳細需求後，我們將於 1 個工作日內提供正式報價單。
               </p>
               <a href="#contact" className="btn btn-primary">取得正式報價 <span className="arr">→</span></a>
