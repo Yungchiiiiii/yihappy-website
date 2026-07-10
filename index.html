@@ -908,7 +908,7 @@ function App() {
               <div className="field">
                 <label>數量 · Quantity (本 / Copies)</label>
                 <div className="qty">
-                  <input type="range" min="10" max="10000" step="2" value={qty} onChange={e => setQty(+e.target.value)} />
+                  <input type="range" min="10" max="2000" step="2" value={qty} onChange={e => setQty(+e.target.value)} />
                   <span className="v">{fmt(qty)}</span>
                 </div>
               </div>
