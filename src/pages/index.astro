@@ -5,6 +5,7 @@ import Container from '../components/Container.astro';
 import FactStrip from '../components/FactStrip.astro';
 import HeroSheet from '../components/HeroSheet.astro';
 import NeedCard from '../components/NeedCard.astro';
+import Phrased from '../components/Phrased.astro';
 import Section from '../components/Section.astro';
 import SectionHead from '../components/SectionHead.astro';
 import { company } from '../data/company';
@@ -30,7 +31,7 @@ const websiteLd = {
       <div class="hero__grid">
         <div class="hero__copy">
           <p class="eyebrow hero__eyebrow">{hero.eyebrow}</p>
-          <h1 id="hero-title" class="t-display hero__title">{hero.title}</h1>
+          <h1 id="hero-title" class="t-display hero__title"><Phrased text={hero.title} /></h1>
           <p class="t-lede hero__lede">{hero.lede}</p>
           <div class="hero__actions">
             <Button href={hero.primary.href} variant="primary" size="lg">{hero.primary.label}</Button>

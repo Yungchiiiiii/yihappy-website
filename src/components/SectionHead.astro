@@ -1,5 +1,6 @@
 ---
-// 區塊標題：eyebrow（mono，選填）+ 標題 + lede（§3.3）；靠左不置中
+// 區塊標題：eyebrow（mono，選填）+ 標題 + lede（§3.3）；靠左不置中。標題用 <Phrased> 控制斷行。
+import Phrased from './Phrased.astro';
 export interface Props {
   title: string;
   eyebrow?: string;
@@ -15,7 +16,7 @@ const { title, eyebrow, lede, as: Tag = 'h2', id, class: className } = Astro.pro
 
 <div class:list={['section-head', className]}>
   {eyebrow && <p class="eyebrow section-head__eyebrow">{eyebrow}</p>}
-  <Tag id={id} class:list={['section-head__title', Tag === 'h1' ? 't-h1' : 't-h2']}>{title}</Tag>
+  <Tag id={id} class:list={['section-head__title', Tag === 'h1' ? 't-h1' : 't-h2']}><Phrased text={title} /></Tag>
   {lede && <p class="section-head__lede t-lede">{lede}</p>}
 </div>
 

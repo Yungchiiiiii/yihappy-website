@@ -1,0 +1,12 @@
+---
+// 依標點把文字切成片語，每個片語用 inline-block 包起來，讓標題只在片語之間換行（見 src/lib/text.ts）。
+import { splitPhrases } from '../lib/text';
+
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+const phrases = splitPhrases(text);
+---
+
+{phrases.map((phrase) => <span class="ph">{phrase}</span>)}

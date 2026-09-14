@@ -60,3 +60,8 @@
 .prose p {
   max-width: 36em;
 }
+
+/* 標題片語：只在片語之間換行（<Phrased>） */
+.ph {
+  display: inline-block;
+}
