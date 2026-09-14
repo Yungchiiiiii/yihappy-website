@@ -1,0 +1,81 @@
+---
+import { company } from '../data/company';
+import { ui } from '../data/ui';
+
+// 電話／Email／地址／營業時間 <dl>；電話與 Email 可點（§3.3）
+type Item = 'address' | 'phone' | 'email' | 'hours';
+interface Props {
+  items?: Item[];
+  class?: string;
+}
+const { items = ['address', 'phone', 'email', 'hours'], class: className } = Astro.props;
+const show = (item: Item): boolean => items.includes(item);
+---
+
+<address class:list={['contact-block', className]}>
+  <dl class="contact-block__list">
+    {
+      show('address') && (
+        <div class="contact-block__row">
+          <dt>{ui.contact.labels.address}</dt>
+          <dd>{company.address.full}</dd>
+        </div>
+      )
+    }
+    {
+      show('phone') && (
+        <div class="contact-block__row">
+          <dt>{ui.contact.labels.phone}</dt>
+          <dd>
+            <a href={company.phone.href}>{company.phone.display}</a>
+          </dd>
+        </div>
+      )
+    }
+    {
+      show('email') && (
+        <div class="contact-block__row">
+          <dt>{ui.contact.labels.email}</dt>
+          <dd>
+            <a href={`mailto:${company.email}`}>{company.email}</a>
+          </dd>
+        </div>
+      )
+    }
+    {
+      show('hours') && (
+        <div class="contact-block__row">
+          <dt>{ui.contact.labels.hours}</dt>
+          <dd>{company.hours.display}</dd>
+        </div>
+      )
+    }
+  </dl>
+</address>
+
+<style>
+  .contact-block {
+    font-style: normal;
+  }
+  .contact-block__list {
+    display: grid;
+    gap: var(--s-4);
+  }
+  .contact-block__row dt {
+    font-family: var(--font-mono);
+    font-size: var(--t-label);
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+    color: var(--ink-3);
+    margin-bottom: var(--s-1);
+  }
+  .contact-block__row dd {
+    font-variant-numeric: tabular-nums;
+    line-height: 1.6;
+  }
+  .contact-block__row a {
+    display: inline-block;
+    padding-block: 2px;
+    white-space: nowrap;
+  }
+</style>

@@ -1,0 +1,110 @@
+---
+import Base from './Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Container from '../components/Container.astro';
+import FaqList from '../components/FaqList.astro';
+import MethodRow from '../components/MethodRow.astro';
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import SpecSheet from '../components/SpecSheet.astro';
+import { company } from '../data/company';
+import { servicesIndex } from '../data/services';
+import type { Service } from '../data/types';
+import { ui } from '../data/ui';
+
+// 服務內頁共用模板（§5.3）：Breadcrumb → H1 + lede → 適合什麼情況 → 怎麼做 → 規格選項 → 注意事項 → FAQ → ContactCta
+interface Props {
+  service: Service;
+}
+const { service } = Astro.props;
+
+const serviceLd = {
+  '@type': 'Service',
+  '@id': `${company.url}${service.path}#service`,
+  name: service.name,
+  serviceType: service.name,
+  description: service.description,
+  url: `${company.url}${service.path}`,
+  provider: { '@id': `${company.url}/#organization` },
+  areaServed: company.areaServed,
+};
+---
+
+<Base
+  title={service.title}
+  description={service.description}
+  path={service.path}
+  jsonLd={[serviceLd]}
+  contactCta={{ service: service.name }}
+>
+  <Section tone="paper" class="service-hero">
+    <Container>
+      <Breadcrumb items={[{ label: servicesIndex.name, href: servicesIndex.path }, { label: service.name }]} />
+      <SectionHead as="h1" title={service.h1} lede={service.lede} class="service-hero__head" />
+    </Container>
+  </Section>
+
+  <Section tone="white">
+    <Container narrow>
+      <div class="service-blocks">
+        <section class="service-block" aria-labelledby="service-fit">
+          <h2 id="service-fit" class="service-block__title">{ui.service.fit}</h2>
+          <ul class="service-block__list">{service.fit.map((item) => <li>{item}</li>)}</ul>
+        </section>
+
+        <section class="service-block" aria-labelledby="service-how">
+          <h2 id="service-how" class="service-block__title">{ui.service.how}</h2>
+          <ol class="service-block__methods">
+            {service.how.map((item, i) => <MethodRow index={i + 1} name={item.name} description={item.detail} compact />)}
+          </ol>
+        </section>
+
+        <section class="service-block" aria-labelledby="service-specs">
+          <h2 id="service-specs" class="service-block__title">{ui.service.specs}</h2>
+          <SpecSheet rows={service.specs} wide />
+        </section>
+
+        <section class="service-block" aria-labelledby="service-notes">
+          <h2 id="service-notes" class="service-block__title">{ui.service.notes}</h2>
+          <ul class="service-block__list">{service.notes.map((item) => <li>{item}</li>)}</ul>
+        </section>
+
+        <section class="service-block" aria-labelledby="service-faq">
+          <h2 id="service-faq" class="service-block__title">{ui.service.faq}</h2>
+          <FaqList items={service.faq} />
+        </section>
+      </div>
+    </Container>
+  </Section>
+</Base>
+
+<style>
+  .service-hero :global(.service-hero__head) {
+    margin-bottom: 0;
+  }
+  .service-blocks {
+    display: grid;
+    gap: var(--s-8);
+  }
+  .service-block__title {
+    font-size: var(--t-h3);
+    margin-bottom: var(--s-4);
+  }
+  .service-block__list {
+    display: grid;
+    gap: var(--s-2);
+    padding-left: 1.2em;
+    list-style: disc;
+    color: var(--ink-2);
+  }
+  .service-block__list li {
+    max-width: 36em;
+  }
+  .service-block__methods {
+    margin-top: var(--s-2);
+  }
+  /* 規格卡的 crop marks 需要外側空間 */
+  .service-block :global(.spec-sheet) {
+    margin-inline: 12px;
+  }
+</style>

@@ -1,0 +1,64 @@
+---
+import { company } from '../data/company';
+import { ui } from '../data/ui';
+
+// 麵包屑（首頁自動加在最前面）+ BreadcrumbList JSON-LD
+interface Props {
+  items: { label: string; href?: string }[];
+  class?: string;
+}
+const { items, class: className } = Astro.props;
+const trail = [{ label: ui.breadcrumb.home, href: '/' }, ...items];
+const last = trail.length - 1;
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: trail.map((item, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: item.label,
+    ...(item.href ? { item: new URL(item.href, company.url).href } : {}),
+  })),
+}).replace(/</g, '\\u003c');
+---
+
+<nav class:list={['breadcrumb', className]} aria-label={ui.breadcrumb.label}>
+  <ol class="breadcrumb__list">
+    {
+      trail.map((item, i) => (
+        <li class="breadcrumb__item">
+          {i < last && item.href ? <a href={item.href}>{item.label}</a> : <span aria-current="page">{item.label}</span>}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+<script type="application/ld+json" is:inline set:html={jsonLd} />
+
+<style>
+  .breadcrumb {
+    margin-bottom: var(--s-5);
+    font-family: var(--font-mono);
+    font-size: var(--t-small);
+    color: var(--ink-3);
+  }
+  .breadcrumb__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2);
+  }
+  .breadcrumb__item + .breadcrumb__item::before {
+    content: '/' / '';
+    margin-right: var(--s-2);
+    color: var(--line-strong);
+  }
+  .breadcrumb a {
+    display: inline-block;
+    padding-block: var(--s-2);
+    color: var(--ink-2);
+  }
+  .breadcrumb [aria-current='page'] {
+    color: var(--ink);
+  }
+</style>

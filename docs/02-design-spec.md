@@ -106,7 +106,7 @@
 
 ### 3.2 字型
 
-- `Noto Sans TC` 400／500／700，**build-time subset** 成三個 woff2（只包含 `src/` 內出現的字元 + ASCII + 常用全形標點），放在 `public/fonts/`，`font-display: swap`，並在 `<head>` 對 700 與 400 做 `<link rel="preload" as="font" type="font/woff2" crossorigin>`。
+- `Noto Sans TC` 400／500／700，**build-time subset** 成三個 woff2：400 涵蓋全站文字、500 只涵蓋導覽／按鈕／標籤文字、700 只涵蓋標題文字（依 build 輸出掃描，見 §11.4），放在 `public/fonts/`，`font-display: swap`，並在 `<head>` 對 700 與 400 做 `<link rel="preload" as="font" type="font/woff2" crossorigin>`。
 - `IBM Plex Mono` 400／500 latin subset（`@fontsource/ibm-plex-mono` 的 latin woff2 複製到 `public/fonts/`）。
 - 詳見 §11.4 字型管線。
 
@@ -498,12 +498,18 @@ docs/              01-audit.md  02-design-spec.md  03-deployment.md  04-qa-repor
 - `deploy.yml`：`push` 到 `main` + `workflow_dispatch`（input `target`: `site`（預設）| `legacy`）→ `site`：`npm ci && npm run build` → `actions/upload-pages-artifact`（path `dist`）→ `actions/deploy-pages`；`legacy`：直接上傳 `legacy-site/` 為 artifact 部署（rollback）。`permissions: pages: write, id-token: write`；`concurrency: group: pages`。
 - `public/CNAME`＝`yihappy.com.tw`；`public/.nojekyll`。
 
-### 11.4 字型管線（`scripts/fonts.mjs`）
-1. 掃描 `src/**/*.{astro,ts,md,json}` 收集所有字元；加入 ASCII 32–126、全形標點「，。、；：？！「」『』（）《》〈〉—…・‧·×–－」、數字、`NT$`、`✓`、`→`、`©`。
-2. 從 `https://raw.githubusercontent.com/google/fonts/<固定 commit>/ofl/notosanstc/NotoSansTC%5Bwght%5D.ttf` 下載變體字型到 `.cache/fonts/`（已存在則跳過）。
-3. 用 `subset-font`（harfbuzz）以 `variationAxes: { wght: 400|500|700 }` 產生三個靜態 woff2 到 `public/fonts/noto-sans-tc-{400,500,700}.woff2`，並寫 `public/fonts/glyphs.json`（涵蓋字元的排序陣列與 hash）。
-4. `scripts/check-fonts.mjs`：重新掃描字元，與 `glyphs.json` 比對；缺字則列出並以非零結束（訊息：`缺少 N 個字元，請執行 npm run fonts`）。
-5. 三個 woff2 與 `glyphs.json` **納入版控**；`.cache/` 不納入。
+### 11.4 字型管線（`scripts/fonts.mjs`，以 build 輸出為準）
+1. `npm run fonts`：先 `astro build`（用目前已有的字型檔），再掃描 `dist/**/*.html`（用 `node-html-parser`），收集三組字元：
+   - `w700`：`h1, h2, h3, h4, .t-display, [data-font="700"]` 內的文字。
+   - `w500`：`nav, button, .btn, label, summary, strong, b, dt, th, .tag, .eyebrow, [data-font="500"]` 內的文字。
+   - `w400`：頁面全部文字。
+   每組再加上 ASCII 32–126、全形標點「，。、；：？！「」『』（）《》〈〉—…・‧·×–－％」、`NT$`、`✓`、`→`、`©`、`｜`、`　`。
+2. 從 `https://raw.githubusercontent.com/google/fonts/main/ofl/notosanstc/NotoSansTC%5Bwght%5D.ttf` 下載變體字型到 `.cache/fonts/NotoSansTC.ttf`（已存在則跳過），並核對 sha256 `864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f`（不符則只警告、不中止，並印出新 hash 方便更新）。
+3. 用 `subset-font`（`variationAxes: { wght: N }`，`targetFormat: 'woff2'`）輸出 `public/fonts/noto-sans-tc-{400,500,700}.woff2`；寫 `public/fonts/glyphs.json`（`{ "400": [...chars], "500": [...], "700": [...] }`，排序）。印出每個檔案大小。
+4. `npm run check:fonts`（在 `astro build` 之後執行）：重新掃描 `dist`，與 `glyphs.json` 比對；任一組有缺字就列出並以非零結束（訊息：`字型缺少 N 個字元（wght 700）：…，請執行 npm run fonts`）。
+5. CSS：`@font-face` 三組 weight 對應三個檔案；`h1–h4` 用 700、`nav/button/label/strong/dt/th/summary/.tag/.eyebrow` 用 500、其餘 400。**禁止**在其他元素上使用 500／700 以外的字重，也不得對未列入 `w700`／`w500` 選擇器的元素設定粗體（否則會落到 fallback 字型）。
+6. 三個 woff2 與 `glyphs.json` 納入版控；`.cache/` 與 `dist/` 不納入。
+7. `IBM Plex Mono`：把 `@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-{400,500}-normal.woff2` 複製到 `public/fonts/`（由 `fonts.mjs` 一併處理），`@font-face` 只宣告 latin `unicode-range`。
 
 ### 11.5 Legacy 相容
 - 首頁 id：`products`、`process`、`why`、`about`、`contact`。

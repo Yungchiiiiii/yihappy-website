@@ -1,0 +1,84 @@
+---
+import { company } from '../data/company';
+
+// <head> 內的 SEO 輸出（§8）：title／description／canonical／OG／Twitter／GSC／JSON-LD（Organization + LocalBusiness，加上頁面自帶的 graph）
+interface Props {
+  title: string;
+  description: string;
+  /** canonical 路徑（預設目前頁面），以 / 結尾 */
+  path?: string;
+  noindex?: boolean;
+  image?: string;
+  type?: 'website' | 'article';
+  /** 額外 JSON-LD 物件（WebSite、Service…），會合併到同一個 @graph */
+  jsonLd?: Record<string, unknown>[];
+}
+const site = Astro.site ?? new URL(company.url);
+const {
+  title,
+  description,
+  path = Astro.url.pathname,
+  noindex = false,
+  image = '/og.png',
+  type = 'website',
+  jsonLd = [],
+} = Astro.props;
+
+const canonical = new URL(path, site).href;
+const imageUrl = new URL(image, site).href;
+const orgId = `${company.url}/#organization`;
+
+const organization = {
+  '@type': ['Organization', 'LocalBusiness'],
+  '@id': orgId,
+  name: company.name,
+  alternateName: company.nameEn,
+  url: `${company.url}/`,
+  logo: `${company.url}/apple-touch-icon.png`,
+  image: imageUrl,
+  telephone: company.phone.international,
+  email: company.email,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: company.address.streetAddress,
+    addressLocality: company.address.addressLocality,
+    addressRegion: company.address.addressRegion,
+    addressCountry: company.address.addressCountry,
+  },
+  foundingDate: String(company.founded),
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: company.hours.dayOfWeek,
+      opens: company.hours.opens,
+      closes: company.hours.closes,
+    },
+  ],
+  areaServed: company.areaServed,
+};
+
+const graph = JSON.stringify({ '@context': 'https://schema.org', '@graph': [organization, ...jsonLd] }).replace(
+  /</g,
+  '\\u003c',
+);
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+{noindex ? <meta name="robots" content="noindex, nofollow" /> : <link rel="canonical" href={canonical} />}
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:site_name" content={company.name} />
+<meta property="og:locale" content="zh_TW" />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={company.name} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+<meta name="google-site-verification" content={company.googleSiteVerification} />
+<script type="application/ld+json" is:inline set:html={graph} />

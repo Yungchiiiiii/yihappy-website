@@ -1,0 +1,130 @@
+---
+import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+import Container from '../components/Container.astro';
+import FactStrip from '../components/FactStrip.astro';
+import HeroSheet from '../components/HeroSheet.astro';
+import NeedCard from '../components/NeedCard.astro';
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { company } from '../data/company';
+import { facts, hero, productsSection } from '../data/home';
+import { needs } from '../data/needs';
+import { pageMeta } from '../data/pages';
+
+// 首頁（§5.1）。Phase 1：區 1 Hero + 事實條、區 2 我要印什麼、區 7 ContactCta（由 Base 帶入）。
+// 區 3（process）、區 4（why）、區 5（規格範例）、區 6（about）於 Phase 2 加入。
+const websiteLd = {
+  '@type': 'WebSite',
+  '@id': `${company.url}/#website`,
+  url: `${company.url}/`,
+  name: company.name,
+  inLanguage: 'zh-TW',
+  publisher: { '@id': `${company.url}/#organization` },
+};
+---
+
+<Base title={pageMeta.home.title} description={pageMeta.home.description} path="/" jsonLd={[websiteLd]}>
+  <Section tone="paper" class="hero" labelledby="hero-title">
+    <Container>
+      <div class="hero__grid">
+        <div class="hero__copy">
+          <p class="eyebrow hero__eyebrow">{hero.eyebrow}</p>
+          <h1 id="hero-title" class="t-display hero__title">{hero.title}</h1>
+          <p class="t-lede hero__lede">{hero.lede}</p>
+          <div class="hero__actions">
+            <Button href={hero.primary.href} variant="primary" size="lg">{hero.primary.label}</Button>
+            <Button href={hero.secondary.href} variant="secondary" size="lg">{hero.secondary.label}</Button>
+          </div>
+        </div>
+        <div class="hero__visual">
+          <HeroSheet />
+        </div>
+      </div>
+      <div class="hero__facts">
+        <FactStrip items={facts} />
+      </div>
+    </Container>
+  </Section>
+
+  <Section tone="white" id={productsSection.id} labelledby="products-title">
+    <Container>
+      <SectionHead
+        id="products-title"
+        eyebrow={productsSection.eyebrow}
+        title={productsSection.title}
+        lede={productsSection.lede}
+      />
+      <ul class="need-grid">
+        {
+          needs.map((need) => (
+            <li>
+              <NeedCard need={need} />
+            </li>
+          ))
+        }
+      </ul>
+      <p class="section-more">
+        <Button variant="text" href={productsSection.more.href} arrow>{productsSection.more.label}</Button>
+      </p>
+    </Container>
+  </Section>
+</Base>
+
+<style>
+  .hero__grid {
+    display: grid;
+    gap: var(--s-7);
+    align-items: center;
+  }
+  .hero__eyebrow {
+    margin-bottom: var(--s-4);
+  }
+  .hero__lede {
+    margin-top: var(--s-5);
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    margin-top: var(--s-6);
+  }
+  .hero__visual {
+    order: 1;
+    display: flex;
+    justify-content: center;
+  }
+  .hero__facts {
+    margin-top: var(--s-8);
+  }
+  .need-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-4);
+  }
+  .section-more {
+    margin-top: var(--s-6);
+  }
+  @media (min-width: 640px) {
+    .need-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--s-5);
+    }
+  }
+  @media (min-width: 900px) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--s-8);
+    }
+    .hero__visual {
+      order: 0;
+      justify-content: flex-end;
+    }
+    .hero__facts {
+      margin-top: var(--s-9);
+    }
+    .need-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

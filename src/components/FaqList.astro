@@ -1,0 +1,93 @@
+---
+import type { FaqItem } from '../data/types';
+
+// FAQ（§3.3）：<details> 為基礎，summary 44px；可輸出 FAQPage JSON-LD
+interface Props {
+  items: FaqItem[];
+  schema?: boolean;
+  class?: string;
+}
+const { items, schema = true, class: className } = Astro.props;
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+}).replace(/</g, '\\u003c');
+---
+
+<div class:list={['faq', className]}>
+  {
+    items.map((item) => (
+      <details class="faq__item">
+        <summary class="faq__q">
+          <span class="faq__q-text">{item.q}</span>
+          <span class="faq__marker" aria-hidden="true" />
+        </summary>
+        <div class="faq__a">
+          <p>{item.a}</p>
+        </div>
+      </details>
+    ))
+  }
+</div>
+{schema && <script type="application/ld+json" is:inline set:html={jsonLd} />}
+
+<style>
+  .faq {
+    border-top: 1px solid var(--line);
+  }
+  .faq__item {
+    border-bottom: 1px solid var(--line);
+  }
+  .faq__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    min-height: 44px;
+    padding-block: var(--s-3);
+    cursor: pointer;
+    list-style: none;
+  }
+  .faq__q::-webkit-details-marker {
+    display: none;
+  }
+  .faq__q:hover .faq__q-text {
+    text-decoration: underline;
+  }
+  .faq__marker {
+    position: relative;
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+  .faq__marker::before,
+  .faq__marker::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 2px;
+    background: currentColor;
+    transform: translate(-50%, -50%);
+    transition: transform var(--dur-2) var(--ease);
+  }
+  .faq__marker::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+  .faq__item[open] .faq__marker::after {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  .faq__a {
+    padding-bottom: var(--s-5);
+    color: var(--ink-2);
+  }
+  .faq__a p {
+    max-width: 36em;
+  }
+</style>

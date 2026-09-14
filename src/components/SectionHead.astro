@@ -1,0 +1,40 @@
+---
+// 區塊標題：eyebrow（mono，選填）+ 標題 + lede（§3.3）；靠左不置中
+export interface Props {
+  title: string;
+  eyebrow?: string;
+  lede?: string;
+  /** 預設 h2；頁面主標題用 h1 */
+  as?: 'h1' | 'h2';
+  /** 標題元素 id（給 Section 的 aria-labelledby 用） */
+  id?: string;
+  class?: string;
+}
+const { title, eyebrow, lede, as: Tag = 'h2', id, class: className } = Astro.props;
+---
+
+<div class:list={['section-head', className]}>
+  {eyebrow && <p class="eyebrow section-head__eyebrow">{eyebrow}</p>}
+  <Tag id={id} class:list={['section-head__title', Tag === 'h1' ? 't-h1' : 't-h2']}>{title}</Tag>
+  {lede && <p class="section-head__lede t-lede">{lede}</p>}
+</div>
+
+<style>
+  .section-head {
+    margin-bottom: var(--s-7);
+  }
+  .section-head__eyebrow {
+    margin-bottom: var(--s-3);
+  }
+  .section-head__lede {
+    margin-top: var(--s-4);
+  }
+  @media (min-width: 900px) {
+    .section-head {
+      margin-bottom: var(--s-8);
+    }
+    .section-head__lede {
+      margin-top: var(--s-5);
+    }
+  }
+</style>

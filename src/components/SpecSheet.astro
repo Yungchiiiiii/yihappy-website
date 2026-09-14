@@ -1,0 +1,118 @@
+---
+import type { SpecRow } from '../data/types';
+
+// 規格卡（§3.3）：白底、1px line、四角 crop marks（pseudo element 畫 8px 線）、mono 標籤 + 值的 <dl>、底部備註
+interface Props {
+  title?: string;
+  rows: SpecRow[];
+  note?: string;
+  headingLevel?: 'h2' | 'h3';
+  /** 全寬（服務頁「規格選項」） */
+  wide?: boolean;
+  id?: string;
+  class?: string;
+}
+const { title, rows, note, headingLevel: Heading = 'h3', wide = false, id, class: className } = Astro.props;
+const Wrapper = title ? 'article' : 'div';
+---
+
+<Wrapper id={id} class:list={['spec-sheet', { 'spec-sheet--wide': wide }, className]}>
+  {title && <Heading class="spec-sheet__title">{title}</Heading>}
+  <dl class="spec-sheet__table">
+    {
+      rows.map((row) => (
+        <div class="spec-sheet__row">
+          <dt>{row.label}</dt>
+          <dd>{row.value}</dd>
+        </div>
+      ))
+    }
+  </dl>
+  {note && <p class="spec-sheet__note">{note}</p>}
+</Wrapper>
+
+<style>
+  .spec-sheet {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: var(--s-5);
+    background: var(--white);
+    border: 1px solid var(--line);
+  }
+  /* 四角 crop marks：一個 pseudo element、八段 8px 線，離角 4px */
+  .spec-sheet::before {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink));
+    background-size:
+      8px 1px, 1px 8px,
+      8px 1px, 1px 8px,
+      8px 1px, 1px 8px,
+      8px 1px, 1px 8px;
+    background-position:
+      left 0 top 12px, left 12px top 0,
+      right 0 top 12px, right 12px top 0,
+      left 0 bottom 12px, left 12px bottom 0,
+      right 0 bottom 12px, right 12px bottom 0;
+    background-repeat: no-repeat;
+  }
+  .spec-sheet__title {
+    font-size: var(--t-h3);
+    margin-bottom: var(--s-4);
+  }
+  .spec-sheet__table {
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+  .spec-sheet__row {
+    display: grid;
+    grid-template-columns: 4.5em minmax(0, 1fr);
+    gap: var(--s-3);
+    padding-block: var(--s-3);
+    border-bottom: 1px solid var(--line);
+  }
+  .spec-sheet__row dt {
+    font-family: var(--font-mono);
+    font-size: var(--t-label);
+    letter-spacing: 0.08em;
+    line-height: 1.8;
+    color: var(--ink-3);
+  }
+  .spec-sheet__row dd {
+    font-size: var(--t-small);
+    line-height: 1.6;
+    font-variant-numeric: tabular-nums;
+  }
+  .spec-sheet__note {
+    margin-top: auto;
+    padding-top: var(--s-4);
+    font-family: var(--font-mono);
+    font-size: var(--t-label);
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+  }
+  .spec-sheet--wide .spec-sheet__row {
+    grid-template-columns: 7em minmax(0, 1fr);
+  }
+  .spec-sheet--wide .spec-sheet__row dd {
+    font-size: var(--t-body-m);
+  }
+  @media (min-width: 900px) {
+    .spec-sheet--wide .spec-sheet__row {
+      grid-template-columns: 9em minmax(0, 1fr);
+      gap: var(--s-5);
+    }
+  }
+</style>

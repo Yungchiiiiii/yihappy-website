@@ -1,0 +1,72 @@
+---
+import Button from './Button.astro';
+import Container from './Container.astro';
+import ContactBlock from './ContactBlock.astro';
+import Section from './Section.astro';
+import { ui } from '../data/ui';
+
+// 「先把需求告訴我們」（首頁區 7；其他頁在 Footer 前共用，§5.1）
+interface Props {
+  id?: string;
+  title?: string;
+  text?: string;
+  /** 服務頁帶入服務名（顯示為 eyebrow） */
+  service?: string;
+}
+const { id = ui.contactCta.id, title = ui.contactCta.title, text = ui.contactCta.text, service } = Astro.props;
+---
+
+<Section tone="ink" id={id} labelledby="contact-cta-title">
+  <Container>
+    <div class="contact-cta">
+      <div class="contact-cta__copy">
+        {service && <p class="eyebrow contact-cta__eyebrow">{service}</p>}
+        <h2 id="contact-cta-title" class="t-h2">{title}</h2>
+        <p class="contact-cta__text">{text}</p>
+        <div class="contact-cta__actions">
+          <Button href={ui.cta.quote.href} variant="primary-on-ink" size="lg">{ui.cta.quote.label}</Button>
+          <Button href={ui.cta.call.href} variant="secondary" size="lg">{ui.cta.call.label}</Button>
+        </div>
+      </div>
+      <ContactBlock items={['address', 'email', 'hours']} class="contact-cta__block" />
+    </div>
+  </Container>
+</Section>
+
+<style>
+  .contact-cta {
+    display: grid;
+    gap: var(--s-7);
+  }
+  .contact-cta__eyebrow {
+    margin-bottom: var(--s-3);
+  }
+  .contact-cta__text {
+    margin-top: var(--s-4);
+    max-width: 36em;
+    color: var(--ink-2);
+  }
+  .contact-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    margin-top: var(--s-6);
+  }
+  .contact-cta :global(.contact-cta__block) {
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--line);
+  }
+  @media (min-width: 900px) {
+    .contact-cta {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+      gap: var(--s-9);
+      align-items: start;
+    }
+    .contact-cta :global(.contact-cta__block) {
+      padding-top: 0;
+      padding-left: var(--s-7);
+      border-top: 0;
+      border-left: 1px solid var(--line);
+    }
+  }
+</style>

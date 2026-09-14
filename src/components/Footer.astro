@@ -1,0 +1,108 @@
+---
+import { Image } from 'astro:assets';
+import logoFull from '../assets/logo-full.png';
+import Container from './Container.astro';
+import ContactBlock from './ContactBlock.astro';
+import { company } from '../data/company';
+import { services, servicesIndex } from '../data/services';
+import { ui } from '../data/ui';
+
+// 頁尾：墨色底；四欄 → 手機兩欄 → 單欄（§3.3）
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer on-ink">
+  <Container>
+    <div class="site-footer__grid">
+      <div class="site-footer__brand">
+        <div class="site-footer__logo">
+          <Image src={logoFull} width={160} densities={[1, 2]} format="webp" alt={company.name} loading="lazy" />
+        </div>
+        <p class="site-footer__tagline">{ui.footer.tagline}</p>
+      </div>
+      <nav class="site-footer__col" aria-label={ui.footer.servicesLabel}>
+        <p class="eyebrow site-footer__label">{ui.footer.servicesLabel}</p>
+        <ul class="site-footer__links">
+          <li><a href={servicesIndex.path}>{ui.footer.servicesIndex}</a></li>
+          {services.map((s) => <li><a href={s.path}>{s.name}</a></li>)}
+        </ul>
+      </nav>
+      <nav class="site-footer__col" aria-label={ui.footer.companyLabel}>
+        <p class="eyebrow site-footer__label">{ui.footer.companyLabel}</p>
+        <ul class="site-footer__links">
+          {ui.footer.companyLinks.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        </ul>
+      </nav>
+      <div class="site-footer__col">
+        <p class="eyebrow site-footer__label">{ui.footer.contactLabel}</p>
+        <ContactBlock class="site-footer__contact" />
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <p class="site-footer__copy tnum">{ui.footer.copyright(year)}</p>
+    </div>
+  </Container>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--ink);
+    padding-block: var(--s-8) var(--s-6);
+    font-size: var(--t-small);
+  }
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-7) var(--s-6);
+  }
+  .site-footer__logo {
+    width: 176px;
+    padding: var(--s-2);
+    background: var(--white);
+    border-radius: var(--r-card);
+  }
+  .site-footer__logo :global(img) {
+    display: block;
+    width: 160px;
+    height: auto;
+  }
+  .site-footer__tagline {
+    margin-top: var(--s-4);
+    max-width: 22em;
+    color: var(--ink-2);
+  }
+  .site-footer__label {
+    margin-bottom: var(--s-3);
+  }
+  .site-footer__links {
+    display: grid;
+    gap: 2px;
+  }
+  .site-footer__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    text-decoration: none;
+    color: var(--paper);
+  }
+  .site-footer__links a:hover {
+    text-decoration: underline;
+  }
+  .site-footer__bottom {
+    margin-top: var(--s-7);
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--line);
+    color: var(--ink-3);
+  }
+  @media (min-width: 640px) {
+    .site-footer__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 900px) {
+    .site-footer__grid {
+      grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+      gap: var(--s-7);
+    }
+  }
+</style>

@@ -1,0 +1,209 @@
+/* ---------- Fonts（§3.2、§11.4）---------- */
+@font-face {
+  font-family: "Noto Sans TC";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/noto-sans-tc-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Noto Sans TC";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/noto-sans-tc-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Noto Sans TC";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/noto-sans-tc-700.woff2") format("woff2");
+}
+/* 以 Noto Sans TC 的垂直度量（hhea 1160 / -288 / 0，UPM 1000）校正系統中文字型，減少字型交換時的 CLS。 */
+@font-face {
+  font-family: "Noto Sans TC Fallback";
+  src: local("PingFang TC"), local("PingFangTC-Regular"), local("Microsoft JhengHei"), local("微軟正黑體"), local("Noto Sans CJK TC");
+  size-adjust: 100%;
+  ascent-override: 116%;
+  descent-override: 28.8%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --header-h: 64px;
+}
+@media (max-width: 899.98px) {
+  :root {
+    --header-h: 56px;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+  background: var(--paper);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--t-body-m);
+  font-weight: 400;
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+}
+@media (min-width: 640px) {
+  body {
+    font-size: var(--t-body);
+  }
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0; /* 中文標題不做字距 */
+  line-height: var(--lh-heading);
+}
+h1 { font-size: var(--t-h1); }
+h2 { font-size: var(--t-h2); }
+h3 { font-size: var(--t-h3); }
+h4 { font-size: var(--t-body); }
+
+p, ul, ol, dl, dd, figure, blockquote, pre {
+  margin: 0;
+}
+ul[class], ol[class] {
+  list-style: none;
+  padding: 0;
+}
+ul:not([class]), ol:not([class]) {
+  padding-left: 1.4em;
+}
+li + li {
+  margin-top: 0; /* spacing handled by components */
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+img, picture, video, canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+}
+button {
+  cursor: pointer;
+}
+textarea {
+  resize: vertical;
+}
+
+/* §11.4.5：500 只用在這些元素；700 只用在標題。其他元素一律 400。 */
+nav, button, .btn, label, summary, strong, b, dt, th, .tag, .eyebrow {
+  font-weight: 500;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+::selection {
+  background: var(--red-tint);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+main {
+  display: block;
+  padding-top: var(--header-h);
+}
+
+html.is-menu-open,
+html.is-menu-open body {
+  overflow: hidden;
+}
+
+/* Skip link（§4）：focus 時可見 */
+.skip-link {
+  position: absolute;
+  top: var(--s-2);
+  left: var(--s-2);
+  z-index: 100;
+  padding: var(--s-3) var(--s-4);
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: var(--r-control);
+  text-decoration: none;
+}
+.skip-link:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

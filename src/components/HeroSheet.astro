@@ -1,0 +1,60 @@
+---
+// Hero 右側視覺（Phase 1 佔位）：一張帶裁切角線的紙。Phase 2 會換成 §5.1 的完整「已對位」插圖。
+// 純裝飾：aria-hidden。顏色只用紙／墨／紅。
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg
+  class:list={['hero-sheet', className]}
+  viewBox="0 0 480 360"
+  aria-hidden="true"
+  focusable="false"
+>
+  <!-- 紙張 -->
+  <rect class="hero-sheet__paper" x="48" y="36" width="384" height="288" />
+  <!-- 裁切角線 -->
+  <g class="hero-sheet__crop">
+    <path d="M48 24V8M36 36H20" />
+    <path d="M432 24V8M444 36h16" />
+    <path d="M48 336v16M36 324H20" />
+    <path d="M432 336v16M444 324h16" />
+  </g>
+  <!-- 版面框線（示意） -->
+  <g class="hero-sheet__layout">
+    <rect x="88" y="76" width="304" height="208" />
+    <path d="M112 132h160M112 156h208M112 180h184" />
+  </g>
+  <!-- 色帶 -->
+  <rect class="hero-sheet__band" x="88" y="284" width="304" height="10" />
+</svg>
+
+<style>
+  .hero-sheet {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 560px;
+  }
+  .hero-sheet__paper {
+    fill: var(--white);
+    stroke: var(--ink);
+    stroke-width: 1;
+  }
+  .hero-sheet__crop {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1;
+  }
+  .hero-sheet__layout {
+    fill: none;
+    stroke: var(--line-strong);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+  }
+  .hero-sheet__band {
+    fill: var(--red);
+  }
+</style>

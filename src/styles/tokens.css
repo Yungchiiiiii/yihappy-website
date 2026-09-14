@@ -1,0 +1,52 @@
+/* Design tokens — docs/02-design-spec.md §3.1（light only） */
+:root {
+  /* color */
+  --paper: #F8F5EF;        /* page background */
+  --paper-2: #EFEAE0;      /* alternate section background */
+  --white: #FFFFFF;        /* cards, inputs */
+  --ink: #17150F;          /* primary text */
+  --ink-2: #3F3B33;        /* secondary text */
+  --ink-3: #6B665C;        /* muted text, min 4.5:1 on --paper */
+  --line: rgba(23, 21, 15, 0.14);
+  --line-strong: rgba(23, 21, 15, 0.32);
+  --red: #CC0029;          /* brand accent, primary button */
+  --red-hover: #A80022;
+  --red-tint: #FBE7EB;
+  --success: #1E7B4A; --warning: #9A6B00; --error: #B3261E;
+  --c: #00AEEF; --m: #EC008C; --y: #FFE600; --k: #231F20;  /* only for CMYK sequence */
+
+  /* type */
+  /* "Noto Sans TC Fallback" 是 base.css 內以 size-adjust／ascent-override 校正過的 local() 字型，降低字型載入時的 CLS（§10）。
+     mono 堆疊在 IBM Plex Mono 之後接 Noto Sans TC，讓 mono 標籤內的中文字也用同一套子集字型。 */
+  --font-sans: "Noto Sans TC", "Noto Sans TC Fallback", "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "Noto Sans TC", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --t-display: clamp(2.5rem, 1.6rem + 3.6vw, 4.5rem);  /* 40 → 72 */
+  --t-h1: clamp(2rem, 1.35rem + 2.6vw, 3.5rem);        /* 32 → 56 */
+  --t-h2: clamp(1.625rem, 1.3rem + 1.4vw, 2.5rem);     /* 26 → 40 */
+  --t-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);     /* 20 → 24 */
+  --t-body: 1.0625rem;  /* 17px desktop */
+  --t-body-m: 1rem;     /* 16px mobile */
+  --t-small: 0.875rem;  /* 14 */
+  --t-label: 0.75rem;   /* 12, mono, letter-spacing .08em */
+  --t-caption: 0.75rem;
+  --lh-tight: 1.15; --lh-heading: 1.25; --lh-body: 1.75;
+
+  /* spacing scale (4-base) */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px;
+  --s-7: 48px; --s-8: 64px; --s-9: 96px; --s-10: 128px;
+  --section-y: clamp(var(--s-8), 6vw + 16px, var(--s-10));
+  --container: 1200px; --container-narrow: 760px;
+  --gutter: clamp(20px, 4vw, 48px);
+
+  /* radius: one value for containers, one for controls */
+  --r-card: 8px; --r-control: 6px; --r-pill: 999px;
+
+  /* elevation: only for sticky header and dialogs */
+  --shadow-1: 0 1px 2px rgba(23,21,15,.06), 0 8px 24px -16px rgba(23,21,15,.18);
+
+  /* motion */
+  --ease: cubic-bezier(.2,.7,.2,1); --dur-1: 160ms; --dur-2: 320ms; --dur-3: 600ms;
+
+  /* breakpoints（§4；media query 無法讀取 custom property，各處以同值硬寫：640 / 900 / 1200） */
+  --bp-sm: 640px; --bp-md: 900px; --bp-lg: 1200px;
+}

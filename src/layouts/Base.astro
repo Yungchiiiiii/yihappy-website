@@ -1,0 +1,66 @@
+---
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/utilities.css';
+import ContactCta from '../components/ContactCta.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import Seo from '../components/Seo.astro';
+import { ui } from '../data/ui';
+
+// 基礎版型：skip link、Header、<main id="main">、（ContactCta）、Footer；字型 preload；Seo
+interface ContactCtaProps {
+  title?: string;
+  text?: string;
+  service?: string;
+}
+interface Props {
+  title: string;
+  description: string;
+  /** canonical 路徑（預設目前頁面） */
+  path?: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>[];
+  /** Footer 前的 ContactCta；/quote/ 與 /contact/ 傳 false（§4） */
+  contactCta?: boolean | ContactCtaProps;
+  class?: string;
+}
+const { title, description, path, noindex = false, jsonLd, contactCta = true, class: className } = Astro.props;
+const cta: ContactCtaProps | null = contactCta === false ? null : contactCta === true ? {} : contactCta;
+---
+
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#F8F5EF" />
+    <link rel="preload" href="/fonts/noto-sans-tc-700.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="/fonts/noto-sans-tc-400.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <Seo title={title} description={description} path={path} noindex={noindex} jsonLd={jsonLd} />
+    <noscript>
+      <style>
+        /* 沒有 JS 時：手機也顯示完整導覽，隱藏漢堡（樣式在 Header／MobileMenu） */
+        .site-nav {
+          display: block !important;
+        }
+        .menu-toggle {
+          display: none !important;
+        }
+      </style>
+    </noscript>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{ui.skipLink}</a>
+    <Header />
+    <main id="main" class={className}>
+      <slot />
+      {cta && <ContactCta {...cta} />}
+    </main>
+    <Footer />
+  </body>
+</html>

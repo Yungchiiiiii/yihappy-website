@@ -1,0 +1,39 @@
+---
+import logoSvg from '../assets/logo-mark.svg?raw';
+
+// 字標（legacy-site/logo.svg 的路徑，經 scripts/icons.mjs 裁切）。
+// 預設渲染為回首頁連結（aria-label="倚樂 首頁"）；link=false 時為靜態圖。
+interface Props {
+  link?: boolean;
+  /** 高度 px（寬度依 viewBox 比例） */
+  height?: number;
+  class?: string;
+}
+const { link = true, height = 26, class: className } = Astro.props;
+
+const ratio = 104.851 / 50.814;
+const width = Math.round(height * ratio);
+const svg = logoSvg
+  .replace('<svg ', `<svg width="${width}" height="${height}" aria-hidden="true" focusable="false" `)
+  .trim();
+---
+
+{
+  link ? (
+    <a href="/" class:list={['logo', className]} aria-label="倚樂 首頁" set:html={svg} />
+  ) : (
+    <span class:list={['logo', className]} role="img" aria-label="倚樂" set:html={svg} />
+  )
+}
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    color: var(--red);
+    text-decoration: none;
+  }
+  .logo :global(svg) {
+    display: block;
+  }
+</style>

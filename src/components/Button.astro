@@ -1,0 +1,161 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+// 按鈕（§3.3）：primary／secondary／text／primary-on-ink；md 44px／lg 52px（sm 40px 只給手機 header 的「詢價」）
+// 可渲染為 <a>（有 href 或 as="a"）或 <button>。圖示只用文字箭頭 →（arrow）。
+type Variant = 'primary' | 'secondary' | 'text' | 'primary-on-ink';
+type Size = 'sm' | 'md' | 'lg';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'type'> {
+  as?: 'a' | 'button';
+  href?: string;
+  variant?: Variant;
+  size?: Size;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  arrow?: boolean;
+  class?: string;
+}
+
+const {
+  as,
+  href,
+  variant = 'primary',
+  size = 'md',
+  type = 'button',
+  disabled = false,
+  arrow = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const Tag = as ?? (href ? 'a' : 'button');
+const classes = ['btn', `btn--${variant}`, `btn--${size}`, className];
+---
+
+{
+  Tag === 'a' ? (
+    <a href={href} class:list={classes} aria-disabled={disabled ? 'true' : undefined} {...rest}>
+      <slot />
+      {arrow && <span class="btn__arrow" aria-hidden="true">→</span>}
+    </a>
+  ) : (
+    <button type={type} class:list={classes} disabled={disabled} {...rest}>
+      <slot />
+      {arrow && <span class="btn__arrow" aria-hidden="true">→</span>}
+    </button>
+  )
+}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-2);
+    min-height: 44px;
+    padding: var(--s-2) 20px;
+    border: 1px solid transparent;
+    border-radius: var(--r-control);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.25;
+    text-decoration: none;
+    text-align: center;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--dur-1) var(--ease),
+      border-color var(--dur-1) var(--ease),
+      color var(--dur-1) var(--ease),
+      text-decoration-color var(--dur-1) var(--ease);
+  }
+  .btn--sm {
+    min-height: 40px;
+    padding-inline: 14px;
+    font-size: 0.875rem;
+  }
+  .btn--lg {
+    min-height: 52px;
+    padding-inline: 28px;
+    font-size: 1.0625rem;
+  }
+
+  /* primary：紅底白字 */
+  .btn--primary {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--white);
+  }
+  .btn--primary:hover {
+    background: var(--red-hover);
+    border-color: var(--red-hover);
+  }
+  /* 紅底按鈕用紙色 outline（§9），外圍再加一圈墨色讓它在紙色底也看得見 */
+  .btn--primary:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--ink);
+  }
+
+  /* secondary：1px 外框，顏色跟隨文字色（墨色底上自動反白） */
+  .btn--secondary {
+    background: transparent;
+    border-color: currentColor;
+    color: inherit;
+  }
+  .btn--secondary:hover {
+    background: color-mix(in srgb, currentColor 8%, transparent);
+  }
+  .btn--secondary:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  /* text：底線連結 */
+  .btn--text {
+    min-height: 44px;
+    padding-inline: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    text-align: left;
+    white-space: normal;
+  }
+  .btn--text:hover {
+    text-decoration-thickness: 2px;
+  }
+  .btn--text.btn--lg {
+    padding-inline: 0;
+  }
+
+  /* primary-on-ink：墨色底上的主要按鈕（紙色底墨字） */
+  .btn--primary-on-ink {
+    background: var(--paper);
+    border-color: var(--paper);
+    color: var(--ink);
+  }
+  .btn--primary-on-ink:hover {
+    background: var(--white);
+    border-color: var(--white);
+  }
+  .btn--primary-on-ink:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 2px;
+  }
+
+  .btn[disabled],
+  .btn[aria-disabled='true'] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .btn__arrow {
+    font-family: var(--font-sans);
+  }
+</style>

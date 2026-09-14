@@ -1,0 +1,63 @@
+---
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/utilities.css';
+import Logo from '../components/Logo.astro';
+import { hero } from '../data/home';
+import { pageMeta } from '../data/pages';
+
+// OG 圖模板（§8）：scripts/og.mjs 以 1200×630 截圖成 public/og.png。noindex、不進 sitemap。
+---
+
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1200" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>OG 圖模板｜{pageMeta.home.title}</title>
+  </head>
+  <body class="og">
+    <main class="og__card">
+      <Logo link={false} height={56} class="og__logo" />
+      <h1 class="og__title">{hero.title}</h1>
+      <p class="eyebrow og__line">{hero.eyebrow}</p>
+    </main>
+  </body>
+</html>
+
+<style>
+  .og {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    background: var(--paper);
+  }
+  .og__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 1200px;
+    height: 630px;
+    padding: 72px 88px;
+  }
+  .og :global(.og__logo) {
+    position: absolute;
+    top: 72px;
+    left: 88px;
+  }
+  .og__title {
+    max-width: 18em;
+    font-size: 64px;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+  .og__line {
+    position: absolute;
+    left: 88px;
+    bottom: 72px;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+  }
+</style>
