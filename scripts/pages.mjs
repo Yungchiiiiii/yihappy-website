@@ -4,6 +4,8 @@
 /** 已建立的頁面 */
 export const pages = [
   { name: 'home', path: '/', lighthouse: true },
+  { name: 'about', path: '/about/' },
+  { name: 'contact', path: '/contact/' },
   { name: '404', path: '/404.html' },
 ];
 
@@ -15,9 +17,7 @@ export const plannedPages = [
   '/services/ctp/',
   '/services/large-format/',
   '/services/finishing/',
-  '/about/',
   '/quote/',
-  '/contact/',
 ];
 
 /** 截圖寬度（§11.1） */

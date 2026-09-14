@@ -6,15 +6,19 @@ import FactStrip from '../components/FactStrip.astro';
 import HeroSheet from '../components/HeroSheet.astro';
 import NeedCard from '../components/NeedCard.astro';
 import Phrased from '../components/Phrased.astro';
+import ProcessScroller from '../components/ProcessScroller.astro';
 import Section from '../components/Section.astro';
 import SectionHead from '../components/SectionHead.astro';
+import SpecSheet from '../components/SpecSheet.astro';
+import WhyList from '../components/WhyList.astro';
 import { company } from '../data/company';
-import { facts, hero, productsSection } from '../data/home';
+import { aboutSection, facts, hero, productsSection, specsSection, whySection } from '../data/home';
 import { needs } from '../data/needs';
 import { pageMeta } from '../data/pages';
+import { specSheets } from '../data/specSheets';
 
-// 首頁（§5.1）。Phase 1：區 1 Hero + 事實條、區 2 我要印什麼、區 7 ContactCta（由 Base 帶入）。
-// 區 3（process）、區 4（why）、區 5（規格範例）、區 6（about）於 Phase 2 加入。
+// 首頁（§5.1）：區 1 Hero + 事實條、區 2 我要印什麼、區 3 ProcessScroller、區 4 為什麼找倚樂、
+// 區 5 常見做法、區 6 關於摘要、區 7 ContactCta（由 Base 帶入）。
 const websiteLd = {
   '@type': 'WebSite',
   '@id': `${company.url}/#website`,
@@ -70,6 +74,46 @@ const websiteLd = {
       </p>
     </Container>
   </Section>
+
+  <ProcessScroller />
+
+  <Section tone="paper" id={whySection.id} labelledby="why-title">
+    <Container>
+      <WhyList titleId="why-title" title={whySection.title} items={whySection.items} />
+    </Container>
+  </Section>
+
+  <Section tone="white" labelledby="specs-title">
+    <Container>
+      <SectionHead id="specs-title" eyebrow={specsSection.eyebrow} title={specsSection.title} lede={specsSection.lede} />
+      <ul class="spec-grid">
+        {
+          specSheets.map((sheet) => (
+            <li>
+              <SpecSheet id={`spec-${sheet.id}`} title={sheet.title} rows={sheet.rows} note={sheet.note} />
+            </li>
+          ))
+        }
+      </ul>
+      <p class="section-more">
+        <Button variant="text" href={specsSection.more.href} arrow>{specsSection.more.label}</Button>
+      </p>
+    </Container>
+  </Section>
+
+  <Section tone="paper-2" id={aboutSection.id} labelledby="about-title">
+    <Container>
+      <div class="about-summary">
+        <h2 id="about-title" class="t-h2 about-summary__title"><Phrased text={aboutSection.title} /></h2>
+        <div class="about-summary__body">
+          {aboutSection.paragraphs.map((text) => <p class="about-summary__text">{text}</p>)}
+          <p class="about-summary__more">
+            <Button variant="text" href={aboutSection.more.href} arrow>{aboutSection.more.label}</Button>
+          </p>
+        </div>
+      </div>
+    </Container>
+  </Section>
 </Base>
 
 <style>
@@ -106,10 +150,34 @@ const websiteLd = {
   .section-more {
     margin-top: var(--s-6);
   }
+  /* 規格卡：crop marks 在卡片外 12px，行列間距要留得下 */
+  .spec-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-7) var(--s-6);
+    padding-block: 12px;
+  }
+  .about-summary {
+    display: grid;
+    gap: var(--s-6);
+  }
+  .about-summary__text {
+    max-width: 36em;
+    color: var(--ink-2);
+  }
+  .about-summary__text + .about-summary__text {
+    margin-top: var(--s-4);
+  }
+  .about-summary__more {
+    margin-top: var(--s-5);
+  }
   @media (min-width: 640px) {
     .need-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--s-5);
+    }
+    .spec-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   @media (min-width: 900px) {
@@ -126,6 +194,15 @@ const websiteLd = {
     }
     .need-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .spec-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--s-6);
+    }
+    .about-summary {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-9);
+      align-items: start;
     }
   }
 </style>

@@ -1,0 +1,88 @@
+---
+import Phrased from './Phrased.astro';
+
+// 「為什麼找倚樂」／「我們在意什麼」版型（§5.1 區 4、§5.4）：不是卡片。
+// 左欄 H2（桌機 sticky），右欄有 mono 編號的段落，段落之間 1px line。
+interface Props {
+  title: string;
+  /** H2 的 id（給 Section 的 aria-labelledby 用） */
+  titleId: string;
+  items: ReadonlyArray<{ n: string; title: string; text: string }>;
+  class?: string;
+}
+const { title, titleId, items, class: className } = Astro.props;
+---
+
+<div class:list={['why-list', className]}>
+  <h2 id={titleId} class="why-list__title t-h2"><Phrased text={title} /></h2>
+  <ol class="why-list__items">
+    {
+      items.map((item) => (
+        <li class="why-list__item">
+          <span class="why-list__num" aria-hidden="true">
+            {item.n}
+          </span>
+          <div class="why-list__body">
+            <h3 class="why-list__heading t-h3">{item.title}</h3>
+            <p class="why-list__text">{item.text}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<style>
+  .why-list {
+    display: grid;
+    gap: var(--s-7);
+  }
+  .why-list__item {
+    display: grid;
+    grid-template-columns: 2.5em minmax(0, 1fr);
+    gap: var(--s-3);
+    align-items: baseline;
+    padding-block: var(--s-6);
+  }
+  .why-list__item:first-child {
+    padding-top: 0;
+  }
+  .why-list__item:last-child {
+    padding-bottom: 0;
+  }
+  .why-list__item + .why-list__item {
+    border-top: 1px solid var(--line);
+  }
+  .why-list__num {
+    font-family: var(--font-mono);
+    font-size: var(--t-label);
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .why-list__text {
+    margin-top: var(--s-3);
+    max-width: 36em;
+    color: var(--ink-2);
+  }
+  /* 桌機兩欄各半：H2 的長片語（例如「跟其他印刷廠不一樣的地方，」）才放得下、不會在片語內斷行 */
+  @media (min-width: 900px) {
+    .why-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--s-8);
+      align-items: start;
+    }
+    .why-list__title {
+      position: sticky;
+      top: calc(var(--header-h) + var(--s-6));
+    }
+    .why-list__item {
+      padding-block: var(--s-7);
+    }
+  }
+  @media (min-width: 1200px) {
+    .why-list {
+      gap: var(--s-9);
+    }
+  }
+</style>

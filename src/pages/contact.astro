@@ -1,0 +1,88 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Button from '../components/Button.astro';
+import Container from '../components/Container.astro';
+import ContactBlock from '../components/ContactBlock.astro';
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { contact } from '../data/contact';
+import { ui } from '../data/ui';
+
+// 聯絡我們（§5.6）：H1；左 ContactBlock + 詢價 + 說明，右 Google Maps iframe（lazy、4:3）+ 外部連結。無 ContactCta。
+---
+
+<Base title={contact.title} description={contact.description} path={contact.path} contactCta={false}>
+  <Section tone="paper" labelledby="contact-h1">
+    <Container>
+      <Breadcrumb items={[{ label: contact.name }]} />
+      <SectionHead as="h1" id="contact-h1" title={contact.h1} />
+      <div class="contact">
+        <div class="contact__info">
+          <ContactBlock class="contact__block" />
+          <div class="contact__actions">
+            <Button href={ui.cta.quote.href} variant="primary" size="lg">{ui.cta.quote.label}</Button>
+          </div>
+          <p class="contact__note">{contact.note}</p>
+        </div>
+        <div class="contact__map">
+          <div class="contact__frame">
+            <iframe
+              src={contact.map.embedSrc}
+              title={contact.map.title}
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+          <p class="contact__map-link">
+            <Button variant="text" href={contact.map.link.href} target="_blank" rel="noopener" arrow>
+              {contact.map.link.label}
+            </Button>
+          </p>
+        </div>
+      </div>
+    </Container>
+  </Section>
+</Base>
+
+<style>
+  .contact {
+    display: grid;
+    gap: var(--s-8);
+    align-items: start;
+  }
+  .contact :global(.contact__block) {
+    font-size: var(--t-body);
+  }
+  .contact__actions {
+    margin-top: var(--s-6);
+  }
+  .contact__note {
+    margin-top: var(--s-4);
+    max-width: 30em;
+    font-size: var(--t-small);
+    color: var(--ink-2);
+  }
+  .contact__frame {
+    aspect-ratio: 4 / 3;
+    max-width: 100%;
+    overflow: hidden;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+  }
+  .contact__frame iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .contact__map-link {
+    margin-top: var(--s-3);
+  }
+  @media (min-width: 900px) {
+    .contact {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-9);
+    }
+  }
+</style>

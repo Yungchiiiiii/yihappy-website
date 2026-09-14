@@ -3,6 +3,7 @@ import { pageMeta } from './pages';
 // /contact/ 文案（§5.6）
 export const contact = {
   ...pageMeta.contact,
+  name: '聯絡我們',
   h1: '聯絡倚樂。',
   note: '詢價請用表單，內容會整理得比較完整；急件直接來電。',
   map: {

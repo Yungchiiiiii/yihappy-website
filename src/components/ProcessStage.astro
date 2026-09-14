@@ -1,0 +1,316 @@
+---
+import { processStage } from '../data/process';
+
+// ProcessScroller 的舞台（§6）：單一 inline SVG（viewBox 640×480），群組以 data-layer 命名，
+// 狀態由根元素的 data-stage（0–4）與 --sp（步驟內進度 0–1）驅動，全部只用 transform／opacity 過渡。
+// 伺服器端輸出最終狀態（data-stage="4"、--sp:1）：JS 未啟用或 prefers-reduced-motion 時直接顯示成書。
+// 純裝飾（步驟文字在右欄）：aria-hidden。
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+const workOrder = processStage.workOrder.map((line, i) => {
+  const [label = '', value = ''] = line.split('：');
+  return { label, value, y: 150 + i * 26 };
+});
+const inks = ['c', 'm', 'y', 'k'] as const;
+---
+
+<div class:list={['ps-stage', className]} data-process-stage data-stage="4">
+  <svg viewBox="0 0 640 480" aria-hidden="true" focusable="false">
+    <!-- stage 3：紙張後方的紙疊 -->
+    <g data-layer="stack">
+      <rect class="s2 f-white s-line" x="140" y="105" width="360" height="270" />
+      <rect class="s1 f-white s-line" x="140" y="105" width="360" height="270" />
+    </g>
+    <!-- 一張紙 -->
+    <g data-layer="sheet">
+      <rect class="f-white s-line" x="140" y="105" width="360" height="270" />
+      <!-- 裁切線與對位標記 -->
+      <g data-layer="marks" class="marks">
+        <path d="M140 83v14M118 105h14M500 83v14M508 105h14M140 383v14M118 375h14M500 383v14M508 375h14" />
+        <g transform="translate(120 240)"><circle r="5" /><path d="M-8 0h16M0 -8v16" /></g>
+        <g transform="translate(520 240)"><circle r="5" /><path d="M-8 0h16M0 -8v16" /></g>
+      </g>
+      <!-- stage 1：版面框線（灰線文字塊示意） -->
+      <g data-layer="wire" class="f-line-strong">
+        <rect x="176" y="140" width="150" height="16" rx="2" />
+        <rect x="176" y="164" width="96" height="8" rx="2" opacity=".7" />
+        <rect x="176" y="196" width="176" height="5" rx="1" opacity=".55" />
+        <rect x="176" y="209" width="176" height="5" rx="1" opacity=".55" />
+        <rect x="176" y="222" width="176" height="5" rx="1" opacity=".55" />
+        <rect x="176" y="235" width="176" height="5" rx="1" opacity=".55" />
+        <rect x="176" y="248" width="176" height="5" rx="1" opacity=".55" />
+        <rect x="176" y="300" width="176" height="5" rx="1" opacity=".55" />
+        <rect x="176" y="313" width="176" height="5" rx="1" opacity=".55" />
+        <rect x="176" y="326" width="140" height="5" rx="1" opacity=".55" />
+      </g>
+      <!-- stage 1：印章 -->
+      <g data-layer="stamp">
+        <rect class="stamp-box" x="412" y="322" width="56" height="28" rx="3" />
+        <text class="mono stamp-text f-red" x="440" y="342" text-anchor="middle" font-size="15">{processStage.stamp}</text>
+      </g>
+      <!-- stage 2：CMYK 四個色層 -->
+      <g data-layer="plate-y"><rect class="f-y" x="372" y="150" width="96" height="96" /></g>
+      <g data-layer="plate-c"><circle class="f-c" cx="420" cy="198" r="44" /></g>
+      <g data-layer="plate-m"><rect class="f-m" x="176" y="272" width="288" height="34" /></g>
+      <g data-layer="plate-k" class="f-k">
+        <rect x="176" y="140" width="176" height="26" />
+        <rect x="176" y="182" width="120" height="7" />
+        <rect x="176" y="200" width="150" height="7" />
+        <rect x="176" y="218" width="100" height="7" />
+        <rect x="176" y="326" width="200" height="6" />
+        <rect x="176" y="340" width="150" height="6" />
+      </g>
+      <!-- stage 0：工單四行 -->
+      <g data-layer="ticket" class="mono f-ink2" font-size="13">
+        {
+          workOrder.map((row) => (
+            <text class="ln" x="176" y={row.y}>
+              <tspan class="f-ink3">{row.label}</tspan>
+              <tspan x="230">{row.value}</tspan>
+            </text>
+          ))
+        }
+      </g>
+    </g>
+    <!-- stage 2：C/M/Y/K 四個小圓點 -->
+    <g data-layer="dots" transform="translate(140 404)">
+      {inks.map((ink, i) => <circle class={`d${ink} f-${ink}`} cx={6 + i * 18} cy="0" r="5" />)}
+    </g>
+    <!-- stage 3／4：書 -->
+    <g data-layer="book">
+      <rect class="f-ink" x="234" y="118" width="20" height="244" />
+      <rect class="f-white s-line" x="254" y="118" width="172" height="244" />
+      <rect class="f-ink" x="272" y="146" width="96" height="20" />
+      <rect class="f-ink" x="272" y="176" width="70" height="6" opacity=".7" />
+      <rect class="f-red" x="254" y="258" width="172" height="26" />
+      <text class="mono f-ink3" x="272" y="335" font-size="11">{processStage.book}</text>
+    </g>
+    <!-- stage 4：檢驗標籤與出貨 -->
+    <g data-layer="qc" class="mono f-ink2" font-size="12">
+      <rect class="qc-box" x="262" y="84" width="72" height="22" rx="11" />
+      <text x="298" y="99" text-anchor="middle">{processStage.inspected}</text>
+    </g>
+    <g data-layer="ship" class="mono f-ink3" font-size="12">
+      <line class="s-line" x1="140" y1="396" x2="500" y2="396" />
+      <text x="140" y="418">{processStage.shipped}</text>
+      <text x="500" y="418" text-anchor="end">{processStage.route}</text>
+    </g>
+  </svg>
+</div>
+
+<style>
+  .ps-stage {
+    --sp: 1;
+    --p: 1;
+    width: 100%;
+    height: 100%;
+  }
+  .ps-stage svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* ---- 顏色與字型（只用 tokens）---- */
+  .f-white { fill: var(--white); }
+  .f-ink { fill: var(--ink); }
+  .f-ink2 { fill: var(--ink-2); }
+  .f-ink3 { fill: var(--ink-3); }
+  .f-red { fill: var(--red); }
+  .f-line-strong { fill: var(--line-strong); }
+  .f-c { fill: var(--c); }
+  .f-m { fill: var(--m); }
+  .f-y { fill: var(--y); }
+  .f-k { fill: var(--k); }
+  .s-line { stroke: var(--line); stroke-width: 1; }
+  .marks { fill: none; stroke: var(--ink); stroke-width: 1; }
+  .stamp-box { fill: none; stroke: var(--red); stroke-width: 2; }
+  .qc-box { fill: none; stroke: var(--line-strong); stroke-width: 1; }
+  .mono { font-family: var(--font-mono); }
+  .stamp-text { font-weight: 500; }
+
+  /* ---- 狀態機：data-stage 0–4 + --sp；只過渡 transform／opacity ---- */
+  .ps-stage [data-layer] {
+    transition:
+      transform var(--dur-3) var(--ease),
+      opacity var(--dur-3) var(--ease);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .ps-stage [data-layer='sheet'],
+  .ps-stage [data-layer='book'],
+  .ps-stage [data-layer='stack'],
+  .ps-stage [data-layer='ticket'],
+  .ps-stage [data-layer^='plate-'] {
+    will-change: transform, opacity;
+  }
+  /* 初始化那一幀不做過渡（script 先加 is-settling 再套用狀態） */
+  .ps-stage.is-settling [data-layer],
+  .ps-stage.is-settling [data-layer] * {
+    transition: none !important;
+  }
+
+  /* 工單：stage 0 逐行出現，之後全部顯示；stage 1 縮到右上角成小標籤；stage 2 淡出 */
+  .ps-stage [data-layer='ticket'] {
+    transform-origin: 0 0;
+  }
+  .ps-stage [data-layer='ticket'] .ln {
+    opacity: 0;
+  }
+  .ps-stage[data-stage='0'] [data-layer='ticket'] .ln:nth-child(1) { opacity: calc(clamp(0, (var(--sp) - 0.05) * 6, 1)); }
+  .ps-stage[data-stage='0'] [data-layer='ticket'] .ln:nth-child(2) { opacity: calc(clamp(0, (var(--sp) - 0.25) * 6, 1)); }
+  .ps-stage[data-stage='0'] [data-layer='ticket'] .ln:nth-child(3) { opacity: calc(clamp(0, (var(--sp) - 0.45) * 6, 1)); }
+  .ps-stage[data-stage='0'] [data-layer='ticket'] .ln:nth-child(4) { opacity: calc(clamp(0, (var(--sp) - 0.65) * 6, 1)); }
+  .ps-stage:not([data-stage='0']) [data-layer='ticket'] .ln {
+    opacity: 1;
+  }
+  .ps-stage[data-stage='1'] [data-layer='ticket'] {
+    transform: translate(198px, 0);
+  }
+  .ps-stage[data-stage='2'] [data-layer='ticket'] {
+    transform: translate(198px, 0);
+    opacity: calc(1 - clamp(0, var(--sp) * 2, 1));
+  }
+  .ps-stage[data-stage='3'] [data-layer='ticket'],
+  .ps-stage[data-stage='4'] [data-layer='ticket'] {
+    opacity: 0;
+    transform: translate(198px, 0);
+  }
+
+  /* 版面框線：stage 1 出現，stage 2 淡出 */
+  .ps-stage [data-layer='wire'] {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  .ps-stage[data-stage='1'] [data-layer='wire'] {
+    opacity: 1;
+    transform: none;
+  }
+  .ps-stage[data-stage='2'] [data-layer='wire'] {
+    opacity: calc(1 - clamp(0, var(--sp) * 2, 1));
+    transform: none;
+  }
+
+  /* 印章：stage 1 蓋下 */
+  .ps-stage [data-layer='stamp'] {
+    opacity: 0;
+    transform: scale(1.3) rotate(-8deg);
+  }
+  .ps-stage[data-stage='1'] [data-layer='stamp'] {
+    opacity: 1;
+    transform: rotate(-8deg);
+    transition-delay: 250ms;
+  }
+
+  /* 色層：stage 2 依 --sp 連續從偏移位置移回原位並淡入（不做 transition）；之後保持對齊 */
+  .ps-stage [data-layer^='plate-'] {
+    opacity: 0;
+    mix-blend-mode: multiply;
+  }
+  .ps-stage[data-stage='2'] [data-layer^='plate-'] {
+    transition: none;
+  }
+  .ps-stage[data-stage='2'] [data-layer='plate-c'] {
+    opacity: calc(clamp(0, (var(--sp) - 0) * 4, 1));
+    transform: translate(calc(-22px * (1 - clamp(0, (var(--sp) - 0) * 2.2, 1))), calc(-16px * (1 - clamp(0, (var(--sp) - 0) * 2.2, 1))));
+  }
+  .ps-stage[data-stage='2'] [data-layer='plate-m'] {
+    opacity: calc(clamp(0, (var(--sp) - 0.18) * 4, 1));
+    transform: translate(calc(22px * (1 - clamp(0, (var(--sp) - 0.18) * 2.2, 1))), calc(-16px * (1 - clamp(0, (var(--sp) - 0.18) * 2.2, 1))));
+  }
+  .ps-stage[data-stage='2'] [data-layer='plate-y'] {
+    opacity: calc(clamp(0, (var(--sp) - 0.36) * 4, 1));
+    transform: translate(calc(-22px * (1 - clamp(0, (var(--sp) - 0.36) * 2.2, 1))), calc(16px * (1 - clamp(0, (var(--sp) - 0.36) * 2.2, 1))));
+  }
+  .ps-stage[data-stage='2'] [data-layer='plate-k'] {
+    opacity: calc(clamp(0, (var(--sp) - 0.54) * 4, 1));
+    transform: translate(calc(22px * (1 - clamp(0, (var(--sp) - 0.54) * 2.2, 1))), calc(16px * (1 - clamp(0, (var(--sp) - 0.54) * 2.2, 1))));
+  }
+  .ps-stage[data-stage='3'] [data-layer^='plate-'],
+  .ps-stage[data-stage='4'] [data-layer^='plate-'] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* C/M/Y/K 小圓點：stage 2 依序點亮；stage 3／4 隱藏 */
+  .ps-stage [data-layer='dots'] circle {
+    opacity: 0.18;
+    transition: opacity var(--dur-2) var(--ease);
+  }
+  .ps-stage[data-stage='2'] [data-layer='dots'] .dc { opacity: calc(0.18 + 0.82 * clamp(0, (var(--sp) - 0) * 4, 1)); }
+  .ps-stage[data-stage='2'] [data-layer='dots'] .dm { opacity: calc(0.18 + 0.82 * clamp(0, (var(--sp) - 0.18) * 4, 1)); }
+  .ps-stage[data-stage='2'] [data-layer='dots'] .dy { opacity: calc(0.18 + 0.82 * clamp(0, (var(--sp) - 0.36) * 4, 1)); }
+  .ps-stage[data-stage='2'] [data-layer='dots'] .dk { opacity: calc(0.18 + 0.82 * clamp(0, (var(--sp) - 0.54) * 4, 1)); }
+  .ps-stage[data-stage='3'] [data-layer='dots'] circle,
+  .ps-stage[data-stage='4'] [data-layer='dots'] circle {
+    opacity: 1;
+  }
+  .ps-stage[data-stage='3'] [data-layer='dots'],
+  .ps-stage[data-stage='4'] [data-layer='dots'] {
+    opacity: 0;
+  }
+
+  /* 紙疊：stage 3 出現在紙張後方，整組往左縮；stage 4 淡出 */
+  .ps-stage [data-layer='stack'] rect {
+    opacity: 0;
+    transition:
+      opacity var(--dur-3) var(--ease),
+      transform var(--dur-3) var(--ease);
+  }
+  .ps-stage[data-stage='3'] [data-layer='stack'] .s1 {
+    opacity: 0.55;
+    transform: translate(7px, -7px);
+  }
+  .ps-stage[data-stage='3'] [data-layer='stack'] .s2 {
+    opacity: 0.3;
+    transform: translate(14px, -14px);
+  }
+  .ps-stage[data-stage='3'] [data-layer='sheet'],
+  .ps-stage[data-stage='3'] [data-layer='stack'] {
+    transform: translateX(-128px) scale(0.74);
+  }
+  .ps-stage[data-stage='3'] [data-layer='marks'],
+  .ps-stage[data-stage='4'] [data-layer='marks'] {
+    opacity: 0;
+  }
+  .ps-stage[data-stage='4'] [data-layer='sheet'],
+  .ps-stage[data-stage='4'] [data-layer='stack'] {
+    opacity: 0;
+    transform: translateX(-140px) scale(0.8);
+  }
+
+  /* 書：stage 3 在右側成書，stage 4 置中略放大 */
+  .ps-stage [data-layer='book'] {
+    opacity: 0;
+    transform: translateX(140px) scale(0.9);
+  }
+  .ps-stage[data-stage='3'] [data-layer='book'] {
+    opacity: 1;
+    transform: translateX(150px) scale(0.9);
+  }
+  .ps-stage[data-stage='4'] [data-layer='book'] {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.02);
+  }
+
+  /* stage 4：檢驗標籤與出貨線 */
+  .ps-stage [data-layer='qc'] {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  .ps-stage[data-stage='4'] [data-layer='qc'] {
+    opacity: 1;
+    transform: none;
+    transition-delay: 300ms;
+  }
+  .ps-stage [data-layer='ship'] {
+    opacity: 0;
+  }
+  .ps-stage[data-stage='4'] [data-layer='ship'] {
+    opacity: 1;
+    transition-delay: 450ms;
+  }
+</style>

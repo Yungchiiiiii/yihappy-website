@@ -75,3 +75,14 @@ export const aboutSection = {
   ],
   more: { label: '認識倚樂', href: '/about/' },
 } as const;
+
+/** Hero 右側插圖 `HeroSheet`（§5.1）：紙上的 mono 規格行、底線下的公司名與地點、SVG 的 aria-label */
+export const heroSheet = {
+  label: '印刷紙張示意：裁切線、對位標記與一份書籍封面版面',
+  rows: [
+    { label: '內頁', value: '道林紙 80g　黑白輪轉' },
+    { label: '封面', value: '銅西 250g　彩色　上霧膜' },
+    { label: '裝訂', value: '膠裝' },
+  ],
+  footer: { left: company.name, right: company.location },
+} as const;

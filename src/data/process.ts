@@ -1,3 +1,4 @@
+import { company } from './company';
 import type { ProcessStep } from './types';
 
 // 首頁區 3 五步（§5.1）；/about/ 的流程列表共用
@@ -37,7 +38,10 @@ export const processStage = {
   stamp: 'OK',
   /** stage 2：色層點 */
   inks: ['C', 'M', 'Y', 'K'],
+  /** stage 3／4：書封上的公司名 */
+  book: company.name,
   /** stage 4 */
   inspected: '檢驗 ✓',
   shipped: '出貨',
+  route: `${company.location} → 全台`,
 } as const;
