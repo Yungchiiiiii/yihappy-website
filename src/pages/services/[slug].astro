@@ -1,0 +1,15 @@
+---
+import type { InferGetStaticPropsType } from 'astro';
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+import { services } from '../../data/services';
+
+// 五個服務內頁（§5.3）：路徑與內容都來自 data/services.ts，版型在 layouts/ServiceLayout.astro
+export function getStaticPaths() {
+  return services.map((service) => ({ params: { slug: service.slug }, props: { service } }));
+}
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { service } = Astro.props as Props;
+---
+
+<ServiceLayout service={service} />

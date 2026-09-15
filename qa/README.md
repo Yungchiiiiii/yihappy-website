@@ -9,4 +9,4 @@ QA 腳本的輸出目錄（除本檔外皆不納入版控）。
 
 頁面清單集中在 `scripts/pages.mjs`；新增頁面時把路徑加進 `pages`（並從 `plannedPages` 移除）。
 
-其他 QA 指令（輸出在終端機）：`npm run test:links`（連結／資產／錨點）、`npm run test:html`（html-validate）、`npm run test:a11y`（axe，serious／critical 必須為 0）、`npm run check:fonts`（字型子集缺字）。
+其他 QA 指令（輸出在終端機）：`npm run test:links`（連結／資產／錨點）、`npm run test:html`（html-validate）、`npm run test:a11y`（axe，serious／critical 必須為 0）、`npm run test:form`（Playwright 操作 `/quote/` 表單與快速試算，攔下 `mailto:` 導向後檢查內容）、`npm run check:fonts`（字型子集缺字）。

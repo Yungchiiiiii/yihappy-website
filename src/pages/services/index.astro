@@ -1,0 +1,75 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import Container from '../../components/Container.astro';
+import MethodRow from '../../components/MethodRow.astro';
+import NeedCard from '../../components/NeedCard.astro';
+import Section from '../../components/Section.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import { methods } from '../../data/methods';
+import { needs } from '../../data/needs';
+import { servicesIndex } from '../../data/services';
+
+// 印刷服務總覽（§5.2）：Breadcrumb → H1 + lede → 區 A 六張 NeedCard → 區 B MethodRow ×6 → ContactCta（Base 帶入）
+---
+
+<Base title={servicesIndex.title} description={servicesIndex.description} path={servicesIndex.path}>
+  <Section tone="paper" class="services-hero" labelledby="services-title">
+    <Container>
+      <Breadcrumb items={[{ label: servicesIndex.name }]} />
+      <SectionHead as="h1" id="services-title" title={servicesIndex.h1} lede={servicesIndex.lede} class="services-hero__head" />
+    </Container>
+  </Section>
+
+  <Section tone="white" id="needs" labelledby="needs-title">
+    <Container>
+      <SectionHead id="needs-title" title={servicesIndex.needsTitle} class="services-needs__head" />
+      <ul class="need-grid">
+        {
+          needs.map((need) => (
+            <li>
+              <NeedCard need={need} />
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  </Section>
+
+  <Section tone="paper-2" id="methods" labelledby="methods-title">
+    <Container>
+      <SectionHead id="methods-title" eyebrow={servicesIndex.methodsLabel} title={servicesIndex.methodsTitle} />
+      <ol class="method-list">
+        {methods.map((m, i) => <MethodRow index={i + 1} name={m.name} description={m.description} tags={m.tags} />)}
+      </ol>
+    </Container>
+  </Section>
+</Base>
+
+<style>
+  .services-hero :global(.services-hero__head) {
+    margin-bottom: 0;
+  }
+  :global(.services-needs__head) {
+    margin-bottom: var(--s-6);
+  }
+  .need-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-4);
+  }
+  .method-list {
+    display: grid;
+  }
+  @media (min-width: 640px) {
+    .need-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--s-5);
+    }
+  }
+  @media (min-width: 900px) {
+    .need-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

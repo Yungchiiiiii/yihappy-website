@@ -1,0 +1,285 @@
+---
+import Button from './Button.astro';
+import ChoiceChips from './ChoiceChips.astro';
+import Field from './Field.astro';
+import {
+  PAGES,
+  PAGES_DEFAULT,
+  QTY,
+  QTY_DEFAULT,
+  estimate,
+  estimatorCopy as copy,
+} from '../data/estimator';
+
+// 書籍印刷快速試算（§5.5）：色彩 segmented、頁數／本數 range + number、結果 NT$ lo – hi、帶入詢價。
+// 公式與常數只從 data/estimator.ts 讀；行為在 src/scripts/estimator.ts（由 quote.astro 的 <script> 呼叫）。
+// 外層是 <details open>：桌機（≥900）summary 隱藏、永遠展開；手機由 estimator.ts 在初始化時收合（預設收合）。
+// 沒有 JS：結果與「帶入詢價」以 quote.astro <head> 的 <noscript> 樣式隱藏，改顯示 noscript 說明。
+const initial = estimate(PAGES_DEFAULT, QTY_DEFAULT, 'color');
+const fmt = (n: number): string => n.toLocaleString('en-US');
+const colorOptions = copy.colorOptions.map((o, i) => ({ value: o.value, label: o.label, checked: i === 0 }));
+---
+
+<details class="estimator" open data-estimator>
+  <summary class="estimator__summary">
+    <span class="estimator__summary-text">{copy.title}</span>
+    <span class="estimator__marker" aria-hidden="true"></span>
+  </summary>
+  <section class="estimator__card" aria-labelledby="estimator-title">
+    <h2 id="estimator-title" class="estimator__title">{copy.title}</h2>
+
+    <ChoiceChips
+      class="estimator__color"
+      legend={copy.color}
+      name="est-color"
+      idPrefix="est-color"
+      options={colorOptions}
+      variant="segmented"
+    />
+
+    <Field id="est-pages" label={copy.pages} class="estimator__field">
+      <div class="estimator__control">
+        <input
+          class="estimator__range"
+          type="range"
+          id="est-pages-range"
+          min={PAGES[0]}
+          max={PAGES[1]}
+          step={PAGES[2]}
+          value={PAGES_DEFAULT}
+          aria-labelledby="est-pages-label"
+          data-est-range="pages"
+        />
+        <input
+          class="control estimator__number"
+          type="number"
+          id="est-pages"
+          min={PAGES[0]}
+          max={PAGES[1]}
+          step={PAGES[2]}
+          value={PAGES_DEFAULT}
+          inputmode="numeric"
+          data-est-number="pages"
+        />
+      </div>
+    </Field>
+
+    <Field id="est-qty" label={copy.qty} class="estimator__field">
+      <div class="estimator__control">
+        <input
+          class="estimator__range"
+          type="range"
+          id="est-qty-range"
+          min={QTY[0]}
+          max={QTY[1]}
+          step={QTY[2]}
+          value={QTY_DEFAULT}
+          aria-labelledby="est-qty-label"
+          data-est-range="qty"
+        />
+        <input
+          class="control estimator__number"
+          type="number"
+          id="est-qty"
+          min={QTY[0]}
+          max={QTY[1]}
+          step={QTY[2]}
+          value={QTY_DEFAULT}
+          inputmode="numeric"
+          data-est-number="qty"
+        />
+      </div>
+    </Field>
+
+    <div class="estimator__result">
+      <p id="est-result-label" class="eyebrow">{copy.result}</p>
+      <output
+        class="estimator__price"
+        for="est-pages est-qty"
+        aria-labelledby="est-result-label"
+        data-est-result
+        data-est-currency={copy.currency}
+        data-font="700"
+      >
+        {copy.currency} {fmt(initial.lo)} – {fmt(initial.hi)}
+      </output>
+    </div>
+    <p class="estimator__note">{copy.note}</p>
+    <div class="estimator__apply">
+      <Button as="button" type="button" variant="secondary" data-est-apply>{copy.apply}</Button>
+    </div>
+    <noscript>
+      <p class="estimator__noscript">{copy.noscript}</p>
+    </noscript>
+  </section>
+</details>
+
+<style>
+  .estimator {
+    position: relative;
+    background: var(--white);
+    border: 1px solid var(--line);
+  }
+  /* 四角 crop marks（同 SpecSheet）：一個 pseudo element、八段 8px 線 */
+  .estimator::before {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink)),
+      linear-gradient(var(--ink), var(--ink));
+    background-size:
+      8px 1px, 1px 8px,
+      8px 1px, 1px 8px,
+      8px 1px, 1px 8px,
+      8px 1px, 1px 8px;
+    background-position:
+      left 0 top 12px, left 12px top 0,
+      right 0 top 12px, right 12px top 0,
+      left 0 bottom 12px, left 12px bottom 0,
+      right 0 bottom 12px, right 12px bottom 0;
+    background-repeat: no-repeat;
+  }
+  .estimator__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    min-height: 44px;
+    padding: var(--s-4) var(--s-5);
+    cursor: pointer;
+    list-style: none;
+  }
+  .estimator__summary::-webkit-details-marker {
+    display: none;
+  }
+  .estimator__summary:hover .estimator__summary-text {
+    text-decoration: underline;
+  }
+  .estimator__marker {
+    position: relative;
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+  .estimator__marker::before,
+  .estimator__marker::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 2px;
+    background: currentColor;
+    transform: translate(-50%, -50%);
+    transition: transform var(--dur-2) var(--ease);
+  }
+  .estimator__marker::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+  .estimator[open] .estimator__marker::after {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  .estimator__card {
+    display: grid;
+    gap: var(--s-5);
+    padding: 0 var(--s-5) var(--s-5);
+  }
+  .estimator__title {
+    display: none;
+    font-size: var(--t-h3);
+  }
+  .estimator__control {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 6em;
+    gap: var(--s-3);
+    align-items: center;
+  }
+  .estimator :global(.estimator__number) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* range：細軌、墨色圓 thumb；整列 44px 高方便觸控 */
+  .estimator__range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 44px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .estimator__range::-webkit-slider-runnable-track {
+    height: 2px;
+    background: var(--line-strong);
+  }
+  .estimator__range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    margin-top: -9px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+  .estimator__range::-moz-range-track {
+    height: 2px;
+    background: var(--line-strong);
+  }
+  .estimator__range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+  .estimator__range:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .estimator__result {
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--line);
+  }
+  .estimator__price {
+    display: block;
+    margin-top: var(--s-1);
+    font-size: var(--t-h2);
+    font-weight: 700;
+    line-height: var(--lh-heading);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+  .estimator__note {
+    font-size: var(--t-small);
+    line-height: 1.6;
+    color: var(--ink-3);
+  }
+  .estimator__noscript {
+    font-size: var(--t-small);
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+
+  @media (min-width: 900px) {
+    /* 桌機：不是可收合的 details，summary 隱藏、標題改由 h2 顯示 */
+    .estimator__summary {
+      display: none;
+    }
+    .estimator__title {
+      display: block;
+    }
+    .estimator__card {
+      padding: var(--s-5);
+    }
+  }
+</style>
