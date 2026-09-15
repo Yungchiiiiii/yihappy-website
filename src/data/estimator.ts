@@ -34,4 +34,6 @@ export const estimatorCopy = {
   note: '此為線上速算僅供參考。彩色每面 NT$1–1.8，黑白每面 NT$0.25–0.35，每本加計 25 元成書費。完成詳細需求後，我們將於 1 個工作日內提供正式報價單。',
   apply: '帶入詢價',
   directContact: '直接聯絡',
+  /** 沒有 JavaScript 時顯示（結果與「帶入詢價」隱藏） */
+  noscript: '快速試算需要 JavaScript。請直接在表單填寫頁數與本數，我們回覆時一併估價。',
 } as const;

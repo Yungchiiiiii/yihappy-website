@@ -1,0 +1,389 @@
+---
+import Button from './Button.astro';
+import ChoiceChips from './ChoiceChips.astro';
+import Field from './Field.astro';
+import { bindings, bindingUnsure } from '../data/bindings';
+import { company } from '../data/company';
+import { finishingOptions } from '../data/finishing';
+import { coverPapers, innerPapers, paperUnsure } from '../data/papers';
+import { quote } from '../data/quote';
+import { ui } from '../data/ui';
+
+// 詢價表單（§5.5）：純 HTML + src/scripts/quote-form.ts（由 quote.astro 的 <script> 呼叫）。
+// 沒有 JS 時退回瀏覽器原生行為：HTML5 驗證 + <form action="mailto:" enctype="text/plain">。
+// 有 JS 時：TS 驗證 → 組合純文字 → mailto → 切到「已整理好內容」狀態（不換頁）。
+// 所有 JS 會顯示的文字（錯誤訊息、已複製、截斷提示）都先渲染在 DOM（hidden），字型子集才涵蓋得到。
+interface Props {
+  /** 表單 aria-labelledby 指向的標題 id */
+  labelledby: string;
+}
+const { labelledby } = Astro.props;
+const f = quote.fields;
+const t = quote.bodyTemplate;
+const catOptions = quote.categories.map((c) => ({ value: c, label: c }));
+const colorOptions = f.color.options.map((o) => ({ value: o.label, label: o.label, data: { mode: o.mode } }));
+const filesOptions = f.files.options.map((o) => ({ value: o, label: o }));
+const finishing = finishingOptions.map((o) => ({ value: o, label: o }));
+const mailtoAction = `mailto:${quote.mailto}?subject=${encodeURIComponent(quote.subjectPrefix)}`;
+---
+
+<div class="quote-form" data-quote>
+  <form
+    id="quote-form"
+    class="qf"
+    action={mailtoAction}
+    method="post"
+    enctype="text/plain"
+    aria-labelledby={labelledby}
+    tabindex="-1"
+    data-qf-form
+    data-mailto={quote.mailto}
+    data-subject-prefix={quote.subjectPrefix}
+    data-heading-prefix={t.headingPrefix}
+    data-divider={t.specsDivider}
+    data-empty={t.empty}
+    data-footer={t.footer}
+    data-category-default={quote.categoryDefault}
+  >
+    <div class="qf__alert" role="alert" hidden data-qf-alert>
+      <p class="qf__alert-title" data-font="500">{quote.errors.summary}</p>
+      <ul class="qf__alert-list" data-qf-alert-list></ul>
+    </div>
+
+    <ChoiceChips
+      class="qf__section qf__section--first"
+      legend={quote.sections.category}
+      legendSize="section"
+      name="category"
+      idPrefix="f-category"
+      options={catOptions}
+      field="category"
+    />
+
+    <fieldset class="qf__section">
+      <legend class="qf__legend" data-font="700">{quote.sections.basics}</legend>
+      <div class="qf__grid">
+        <Field id="f-name" field="name" label={f.name.label} required error={quote.errors.name}>
+          <input class="control" id="f-name" name="name" type="text" required autocomplete="name" />
+        </Field>
+        <Field id="f-org" field="org" label={f.org.label}>
+          <input class="control" id="f-org" name="org" type="text" autocomplete="organization" />
+        </Field>
+        <div class="qf__pair" data-qf-contact>
+          <div class="qf__grid qf__grid--pair">
+            <Field id="f-phone" field="phone" label={f.phone.label}>
+              <input class="control" id="f-phone" name="phone" type="tel" autocomplete="tel" aria-describedby="f-contact-hint" />
+            </Field>
+            <Field id="f-email" field="email" label={f.email.label} error={quote.errors.email}>
+              <input class="control" id="f-email" name="email" type="email" autocomplete="email" aria-describedby="f-contact-hint" />
+            </Field>
+          </div>
+          <p id="f-contact-hint" class="qf__hint">{f.contactHint}</p>
+          <p id="f-contact-error" class="qf__error" hidden>{quote.errors.contact}</p>
+        </div>
+        <Field id="f-brief" field="brief" label={f.brief.label} required error={quote.errors.brief} class="qf__span">
+          <textarea class="control" id="f-brief" name="brief" rows="5" required placeholder={f.brief.placeholder}></textarea>
+        </Field>
+      </div>
+    </fieldset>
+
+    <details class="qf__specs" id="quote-specs" data-qf-specs>
+      <summary class="qf__specs-summary" data-font="700">
+        <span class="qf__specs-title">{quote.sections.specs}</span>
+        <span class="qf__specs-marker" aria-hidden="true"></span>
+      </summary>
+      <div class="qf__specs-body">
+        <div class="qf__grid qf__grid--three">
+          <Field id="f-qty" field="qty" label={f.qty.label}>
+            <input class="control" id="f-qty" name="qty" type="number" min="1" step="1" inputmode="numeric" />
+          </Field>
+          <Field id="f-size" field="size" label={f.size.label}>
+            <input class="control" id="f-size" name="size" type="text" placeholder={f.size.placeholder} />
+          </Field>
+          <Field id="f-pages" field="pages" label={f.pages.label}>
+            <input class="control" id="f-pages" name="pages" type="number" min="2" step="2" inputmode="numeric" />
+          </Field>
+        </div>
+        <ChoiceChips legend={f.color.label} name="color" idPrefix="f-color" options={colorOptions} field="color" />
+        <div class="qf__grid">
+          <Field id="f-inner-paper" field="innerPaper" label={f.innerPaper.label}>
+            <select class="control" id="f-inner-paper" name="innerPaper">
+              <option value="">{quote.selectPlaceholder}</option>
+              {innerPapers.map((p) => <option value={p}>{p}</option>)}
+              <option value={paperUnsure}>{paperUnsure}</option>
+            </select>
+          </Field>
+          <Field id="f-cover-paper" field="coverPaper" label={f.coverPaper.label}>
+            <select class="control" id="f-cover-paper" name="coverPaper">
+              <option value="">{quote.selectPlaceholder}</option>
+              {coverPapers.map((p) => <option value={p}>{p}</option>)}
+              <option value={paperUnsure}>{paperUnsure}</option>
+            </select>
+          </Field>
+          <Field id="f-binding" field="binding" label={f.binding.label}>
+            <select class="control" id="f-binding" name="binding">
+              <option value="">{quote.selectPlaceholder}</option>
+              {bindings.map((b) => <option value={b}>{b}</option>)}
+              <option value={bindingUnsure}>{bindingUnsure}</option>
+            </select>
+          </Field>
+        </div>
+        <ChoiceChips legend={f.finishing.label} name="finishing[]" idPrefix="f-finishing" type="checkbox" options={finishing} field="finishing" />
+        <div class="qf__grid">
+          <Field id="f-due" field="due" label={f.due.label}>
+            <input class="control" id="f-due" name="due" type="text" placeholder={f.due.placeholder} />
+          </Field>
+        </div>
+        <ChoiceChips legend={f.files.label} name="files" idPrefix="f-files" options={filesOptions} field="files" />
+      </div>
+    </details>
+
+    <div class="qf__submit">
+      <Button type="submit" variant="primary" size="lg">{quote.submit}</Button>
+      <p class="qf__note">{quote.submitNote}</p>
+    </div>
+  </form>
+
+  <div class="qf-done" hidden data-qf-done>
+    <p class="qf-done__banner" role="status" tabindex="-1" data-qf-banner>{quote.success.banner}</p>
+    <p class="qf-done__warn" hidden data-qf-warn>{quote.success.tooLong}</p>
+    <p class="eyebrow qf-done__label">{quote.success.previewLabel}</p>
+    <pre class="qf-done__pre" data-qf-preview></pre>
+    <div class="qf-done__actions">
+      <Button as="button" type="button" variant="secondary" size="lg" data-qf-copy>
+        <span data-qf-copy-label>{quote.success.copy}</span>
+        <span hidden data-qf-copied>{quote.success.copied}</span>
+      </Button>
+      <Button href={`mailto:${quote.mailto}`} variant="primary" size="lg" data-qf-mail>{quote.success.mail}</Button>
+      <Button href={company.phone.href} variant="secondary" size="lg">{ui.cta.call.label}</Button>
+    </div>
+    <p class="qf-done__edit">
+      <Button as="button" type="button" variant="text" data-qf-edit>{quote.success.edit}</Button>
+    </p>
+  </div>
+</div>
+
+<style>
+  .qf {
+    padding: var(--s-5);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+  }
+  .qf:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  /* 錯誤摘要 */
+  .qf__alert {
+    margin-bottom: var(--s-5);
+    padding: var(--s-4);
+    border: 1px solid var(--error);
+    border-left-width: 4px;
+    border-radius: var(--r-control);
+    color: var(--ink);
+  }
+  .qf__alert-title {
+    color: var(--error);
+    font-weight: 500;
+  }
+  .qf__alert-list {
+    display: grid;
+    gap: var(--s-1);
+    margin-top: var(--s-2);
+    padding-left: 1.2em;
+    list-style: disc;
+    font-size: var(--t-small);
+  }
+  .qf__alert-list a {
+    display: inline-block;
+    padding-block: var(--s-1);
+  }
+
+  /* 三段 */
+  .qf :global(.qf__section) {
+    padding-block: var(--s-6);
+    border-top: 1px solid var(--line);
+  }
+  .qf :global(.qf__section--first) {
+    padding-top: 0;
+    border-top: 0;
+  }
+  .qf__section {
+    min-width: 0;
+    margin: 0;
+    padding-inline: 0;
+    border-inline: 0;
+    border-bottom: 0;
+  }
+  .qf__legend {
+    float: left;
+    width: 100%;
+    padding: 0;
+    margin-bottom: var(--s-5);
+    font-size: var(--t-h3);
+    font-weight: 700;
+    line-height: var(--lh-heading);
+  }
+  .qf__grid {
+    clear: both;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-5);
+  }
+  .qf__pair {
+    display: grid;
+    gap: var(--s-2);
+  }
+  .qf__hint {
+    font-size: var(--t-small);
+    line-height: 1.6;
+    color: var(--ink-3);
+  }
+  .qf__error {
+    font-size: var(--t-small);
+    line-height: 1.6;
+    color: var(--error);
+  }
+
+  /* 第 3 段：details */
+  .qf__specs {
+    border-top: 1px solid var(--line);
+  }
+  .qf__specs-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    min-height: 44px;
+    padding-block: var(--s-5);
+    font-size: var(--t-h3);
+    font-weight: 700;
+    line-height: var(--lh-heading);
+    cursor: pointer;
+    list-style: none;
+  }
+  .qf__specs-summary::-webkit-details-marker {
+    display: none;
+  }
+  .qf__specs-summary:hover .qf__specs-title {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.15em;
+  }
+  .qf__specs-marker {
+    position: relative;
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+  .qf__specs-marker::before,
+  .qf__specs-marker::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 2px;
+    background: currentColor;
+    transform: translate(-50%, -50%);
+    transition: transform var(--dur-2) var(--ease);
+  }
+  .qf__specs-marker::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+  .qf__specs[open] .qf__specs-marker::after {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  .qf__specs-body {
+    display: grid;
+    gap: var(--s-6);
+    padding-bottom: var(--s-6);
+  }
+
+  /* 送出 */
+  .qf__submit {
+    display: grid;
+    gap: var(--s-4);
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--line);
+  }
+  .qf__submit :global(.btn) {
+    justify-self: start;
+  }
+  .qf__note {
+    font-size: var(--t-small);
+    line-height: 1.6;
+    color: var(--ink-3);
+    max-width: 36em;
+  }
+
+  /* 已整理好內容 */
+  .qf-done {
+    display: grid;
+    gap: var(--s-4);
+    padding: var(--s-5);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+  }
+  .qf-done__banner {
+    padding: var(--s-4);
+    background: var(--paper);
+    border-left: 4px solid var(--success);
+    border-radius: 0 var(--r-control) var(--r-control) 0;
+  }
+  .qf-done__banner:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .qf-done__warn {
+    padding: var(--s-3) var(--s-4);
+    border: 1px solid var(--warning);
+    border-radius: var(--r-control);
+    font-size: var(--t-small);
+    color: var(--ink);
+  }
+  .qf-done__label {
+    margin-top: var(--s-2);
+  }
+  .qf-done__pre {
+    padding: var(--s-4);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-control);
+    font-family: var(--font-mono);
+    font-size: var(--t-small);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+  .qf-done__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    margin-top: var(--s-2);
+  }
+  .qf-done__edit {
+    margin-top: var(--s-2);
+  }
+
+  @media (min-width: 640px) {
+    .qf,
+    .qf-done {
+      padding: var(--s-6);
+    }
+    .qf__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .qf__grid--three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .qf__pair,
+    .qf :global(.qf__span) {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

@@ -1,0 +1,129 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactBlock from '../components/ContactBlock.astro';
+import Container from '../components/Container.astro';
+import Estimator from '../components/Estimator.astro';
+import FaqList from '../components/FaqList.astro';
+import Phrased from '../components/Phrased.astro';
+import QuoteForm from '../components/QuoteForm.astro';
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { faq } from '../data/faq';
+import { quote } from '../data/quote';
+
+// 詢價（§5.5）：桌機 7/5 兩欄（左表單 + FAQ，右 sticky 快速試算 + 直接聯絡）；
+// 手機單欄：表單 → 快速試算（details，預設收合）→ FAQ → 直接聯絡。無 ContactCta（§4）。
+---
+
+<Base title={quote.title} description={quote.description} path={quote.path} contactCta={false}>
+  <Fragment slot="head">
+    <noscript>
+      <style is:inline>
+        /* 沒有 JS：快速試算不會算，隱藏結果與「帶入詢價」，顯示 noscript 說明（Estimator.astro） */
+        .estimator__result,
+        .estimator__apply {
+          display: none !important;
+        }
+      </style>
+    </noscript>
+  </Fragment>
+
+  <Section tone="paper" class="quote" labelledby="quote-title">
+    <Container>
+      <SectionHead as="h1" id="quote-title" title={quote.h1} lede={quote.lede} />
+      <div class="quote__grid">
+        <div class="quote__main">
+          <div class="quote__form">
+            <QuoteForm labelledby="quote-title" />
+          </div>
+          <section class="quote__faq" aria-labelledby="quote-faq-title">
+            <h2 id="quote-faq-title" class="quote__h2"><Phrased text={quote.faqTitle} /></h2>
+            <FaqList items={faq.quote} />
+          </section>
+        </div>
+        <div class="quote__side">
+          <div class="quote__estimator">
+            <Estimator />
+          </div>
+          <section class="quote__direct" aria-labelledby="quote-direct-title">
+            <h2 id="quote-direct-title" class="quote__h2"><Phrased text={quote.direct.title} /></h2>
+            <ContactBlock items={['phone', 'email', 'hours']} />
+          </section>
+        </div>
+      </div>
+    </Container>
+  </Section>
+</Base>
+
+<script>
+  import { initEstimator } from '../scripts/estimator';
+  import { initQuoteForm } from '../scripts/quote-form';
+
+  const form = initQuoteForm();
+  initEstimator({ apply: form?.apply });
+</script>
+
+<style>
+  /* 手機：四個區塊排成一欄，順序 表單 → 試算 → FAQ → 直接聯絡 */
+  .quote__grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-7);
+  }
+  .quote__main,
+  .quote__side {
+    display: contents;
+  }
+  .quote__form {
+    order: 1;
+  }
+  .quote__estimator {
+    order: 2;
+    /* crop marks 需要外側空間 */
+    padding-inline: 12px;
+  }
+  .quote__faq {
+    order: 3;
+  }
+  .quote__direct {
+    order: 4;
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--line);
+  }
+  .quote__h2 {
+    font-size: var(--t-h3);
+    margin-bottom: var(--s-4);
+  }
+
+  @media (min-width: 900px) {
+    .quote__grid {
+      display: grid;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--s-8);
+      align-items: start;
+    }
+    .quote__main,
+    .quote__side {
+      display: grid;
+      gap: var(--s-8);
+      min-width: 0;
+    }
+    .quote__side {
+      position: sticky;
+      top: calc(var(--header-h) + var(--s-6));
+      gap: var(--s-7);
+    }
+    .quote__estimator {
+      padding-top: 12px;
+    }
+    .quote__direct {
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
+  @media (min-width: 1200px) {
+    .quote__grid {
+      gap: var(--s-9);
+    }
+  }
+</style>

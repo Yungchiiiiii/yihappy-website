@@ -24,7 +24,8 @@
 | `npm run test:html` | `html-validate dist/**/*.html`（設定：`.htmlvalidate.json`） |
 | `npm run test:a11y` | axe（`@axe-core/playwright`）每頁 1280／390 寬度（含選單開啟），serious／critical 必須為 0 |
 | `npm run test:screens` | 每頁 375／390／768／1280／1440 全頁截圖到 `qa/screenshots/`，並檢查 console error／warning 與水平溢出 |
-| `npm test` | `check:fonts` → `test:build` → `test:links` → `test:html` → `test:a11y` |
+| `npm run test:form` | Playwright 操作 `/quote/`：驗證、送出後預覽與 `mailto` 內容、複製、重新編輯、快速試算與「帶入詢價」、手機收合、無 JS 退回（`scripts/form-test.mjs`） |
+| `npm test` | `check:fonts` → `test:build` → `test:links` → `test:html` → `test:a11y` → `test:form` |
 | `npm run lighthouse` | Lighthouse mobile（首頁與 `/quote/`）→ `qa/lighthouse/` |
 
 ## 專案結構
@@ -40,7 +41,7 @@ src/
   pages/                index、404、og-template（Phase 2：services/、about、quote、contact）
   scripts/              瀏覽器端 TS（mobile-menu；Phase 2：process-scroller、quote-form、estimator）
   styles/               tokens.css（§3.1）、base.css（reset、@font-face、基礎排版）、utilities.css
-scripts/                Node 腳本：fonts、check-fonts、icons、links、screens、a11y、og、lighthouse；pages.mjs 為共用頁面清單；lib/ 共用模組
+scripts/                Node 腳本：fonts、check-fonts、icons、links、screens、a11y、form-test、og、lighthouse；pages.mjs 為共用頁面清單；lib/ 共用模組
 qa/                     screenshots/、lighthouse/（gitignored，見 qa/README.md）
 legacy-site/            舊站完整檔案（rollback 用，請勿修改）
 docs/                   01-audit、02-design-spec、PRODUCTION_BASELINE

@@ -19,7 +19,8 @@
     "test:a11y": "node scripts/a11y.mjs",
     "test:screens": "node scripts/screens.mjs",
     "test:html": "html-validate \"dist/**/*.html\"",
-    "test": "npm run check:fonts && npm run test:build && npm run test:links && npm run test:html && npm run test:a11y",
+    "test:form": "node scripts/form-test.mjs",
+    "test": "npm run check:fonts && npm run test:build && npm run test:links && npm run test:html && npm run test:a11y && npm run test:form",
     "lighthouse": "node scripts/lighthouse.mjs",
     "icons": "node scripts/icons.mjs"
   },
