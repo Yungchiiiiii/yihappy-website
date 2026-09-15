@@ -1,4 +1,5 @@
 ---
+import Phrased from '../components/Phrased.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/utilities.css';
@@ -20,7 +21,7 @@ import { pageMeta } from '../data/pages';
   <body class="og">
     <main class="og__card">
       <Logo link={false} height={56} class="og__logo" />
-      <h1 class="og__title">{hero.title}</h1>
+      <h1 class="og__title"><Phrased text={hero.title} /></h1>
       <p class="eyebrow og__line">{hero.eyebrow}</p>
     </main>
   </body>
