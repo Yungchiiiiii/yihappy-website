@@ -4,7 +4,7 @@ import { pageMeta } from './pages';
 export const about = {
   ...pageMeta.about,
   name: '關於倚樂',
-  h1: '一間把書印好的印刷公司。',
+  h1: '一間把書印好的\u200B印刷公司。',
   lede: '倚樂企業有限公司 2009 年在新北中和成立，從教科書與書籍印刷做起。',
   values: {
     title: '我們在意什麼',

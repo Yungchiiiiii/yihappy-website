@@ -70,8 +70,17 @@ import { processSteps } from '../data/process';
     padding-inline: var(--gutter);
     background: var(--paper-2);
   }
+  /* 手機：舞台以高度為準填滿，左右多出的部分裁掉，讓紙張在小螢幕上大一點 */
   .scroller.is-live .scroller__stage-box {
     height: 100%;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .scroller.is-live .scroller__stage-box :global(svg) {
+    height: 100%;
+    width: auto;
+    max-width: none;
   }
   .scroller.is-live .scroller__steps {
     gap: 0;
@@ -104,7 +113,7 @@ import { processSteps } from '../data/process';
       justify-content: center;
     }
     .scroller__stage-box {
-      max-width: 560px;
+      max-width: 680px;
     }
     .scroller.is-live {
       gap: var(--s-8);
@@ -117,6 +126,12 @@ import { processSteps } from '../data/process';
     }
     .scroller.is-live .scroller__stage-box {
       max-height: 100%;
+      overflow: visible;
+    }
+    .scroller.is-live .scroller__stage-box :global(svg) {
+      height: auto;
+      width: 100%;
+      max-width: 100%;
     }
     .scroller.is-live .scroller__steps :global(.scroller__step) {
       min-height: 100vh;
