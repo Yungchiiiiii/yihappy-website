@@ -85,6 +85,10 @@ import { processSteps } from '../data/process';
     height: 100%;
     width: auto;
     max-width: none;
+    /* SVG 比容器寬時置中裁切（容器是 block，overflow 會往右邊跑） */
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
   }
   .scroller.is-live .scroller__steps {
     gap: 0;
@@ -107,7 +111,7 @@ import { processSteps } from '../data/process';
 
   @media (min-width: 900px) {
     .scroller {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); /* 舞台佔多一點，步驟文字短 */
       gap: var(--s-8);
       align-items: start;
     }
@@ -129,6 +133,8 @@ import { processSteps } from '../data/process';
       background: none;
     }
     .scroller.is-live .scroller__stage-box {
+      display: block;
+      height: auto; /* 手機規則的 height:100% 會把 SVG 推到最上面，桌機改回由 flex 垂直置中 */
       max-height: 100%;
       overflow: visible;
     }
@@ -136,6 +142,8 @@ import { processSteps } from '../data/process';
       height: auto;
       width: 100%;
       max-width: 100%;
+      left: auto;
+      transform: none;
     }
     .scroller.is-live .scroller__steps :global(.scroller__step) {
       min-height: 100vh;
