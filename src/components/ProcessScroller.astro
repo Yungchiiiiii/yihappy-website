@@ -41,7 +41,11 @@ import { processSteps } from '../data/process';
   /* ---- 預設版型（無 JS／reduced-motion）---- */
   .scroller {
     display: grid;
+    grid-template-columns: minmax(0, 1fr); /* 不讓 SVG 的固有寬度撐開欄位（手機裁切模式） */
     gap: var(--s-7);
+  }
+  .scroller__stage {
+    min-width: 0;
   }
   .scroller__stage-box {
     width: 100%;
