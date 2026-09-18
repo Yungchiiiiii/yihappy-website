@@ -1,0 +1,104 @@
+---
+import Tag from './Tag.astro';
+
+// 技術層列表列（§3.3）：左 mono 編號 + 名稱，右說明與設備 tag。渲染為 <li>，父層請用 <ol>。
+// compact：服務頁「怎麼做」精簡版（名稱 + 說明，無 tag）。
+interface Props {
+  index: number;
+  name: string;
+  description?: string;
+  tags?: string[];
+  compact?: boolean;
+  /** 名稱的元素；compact 預設 strong，否則 h3 */
+  headingLevel?: 'h3' | 'h4' | 'strong';
+  class?: string;
+}
+const { index, name, description, tags = [], compact = false, headingLevel, class: className } = Astro.props;
+const Heading = headingLevel ?? (compact ? 'strong' : 'h3');
+const number = String(index).padStart(2, '0');
+---
+
+<li class:list={['method-row', { 'method-row--compact': compact }, className]}>
+  <div class="method-row__head">
+    <span class="method-row__num" aria-hidden="true">{number}</span>
+    {
+      Heading === 'strong' ? (
+        <p class="method-row__name">
+          <strong>{name}</strong>
+        </p>
+      ) : (
+        <Heading class="method-row__name method-row__name--heading">{name}</Heading>
+      )
+    }
+  </div>
+  {
+    (description || tags.length > 0) && (
+      <div class="method-row__body">
+        {description && <p class="method-row__desc">{description}</p>}
+        {tags.length > 0 && (
+          <ul class="method-row__tags">
+            {tags.map((tag) => (
+              <li>
+                <Tag>{tag}</Tag>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    )
+  }
+</li>
+
+<style>
+  .method-row {
+    display: grid;
+    gap: var(--s-3);
+    padding-block: var(--s-5);
+    border-top: 1px solid var(--line);
+  }
+  .method-row:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+  .method-row__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+  }
+  .method-row__num {
+    flex: none;
+    min-width: 2.2em;
+    font-family: var(--font-mono);
+    font-size: var(--t-label);
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .method-row__name--heading {
+    font-size: var(--t-h3);
+  }
+  .method-row__desc {
+    color: var(--ink-2);
+    max-width: 36em;
+  }
+  .method-row__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    margin-top: var(--s-3);
+  }
+  .method-row--compact {
+    padding-block: var(--s-4);
+  }
+  .method-row--compact .method-row__desc {
+    font-size: var(--t-small);
+  }
+  @media (min-width: 900px) {
+    .method-row {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-6);
+    }
+    .method-row--compact {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    }
+  }
+</style>

@@ -1,0 +1,200 @@
+---
+import Base from './Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Container from '../components/Container.astro';
+import FaqList from '../components/FaqList.astro';
+import MethodRow from '../components/MethodRow.astro';
+import Phrased from '../components/Phrased.astro';
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import SpecSheet from '../components/SpecSheet.astro';
+import { company } from '../data/company';
+import { servicesIndex } from '../data/services';
+import type { Service } from '../data/types';
+import { ui } from '../data/ui';
+
+// 服務內頁共用模板（§5.3）：Breadcrumb → H1 + lede → 適合什麼情況 → 怎麼做 → 規格選項 → 注意事項 → FAQ → ContactCta
+// 版型：內容欄 760px 為主；「適合什麼情況」是兩欄短句、「怎麼做」是 MethodRow 精簡版、「規格選項」全寬兩欄（左標題 sticky）。
+interface Props {
+  service: Service;
+}
+const { service } = Astro.props;
+
+const serviceLd = {
+  '@type': 'Service',
+  '@id': `${company.url}${service.path}#service`,
+  name: service.name,
+  serviceType: service.name,
+  description: service.description,
+  url: `${company.url}${service.path}`,
+  provider: { '@id': `${company.url}/#organization` },
+  areaServed: company.areaServed,
+};
+---
+
+<Base
+  title={service.title}
+  description={service.description}
+  path={service.path}
+  jsonLd={[serviceLd]}
+  contactCta={{ service: service.name }}
+>
+  <Section tone="paper" class="service-hero" labelledby="service-title">
+    <Container>
+      <Breadcrumb items={[{ label: servicesIndex.name, href: servicesIndex.path }, { label: service.name }]} />
+      <SectionHead as="h1" id="service-title" title={service.h1} lede={service.lede} class="service-hero__head" />
+    </Container>
+  </Section>
+
+  <Section tone="white">
+    <Container narrow>
+      <div class="service-stack">
+        <section class="service-block" aria-labelledby="service-fit">
+          <h2 id="service-fit" class="service-block__title"><Phrased text={ui.service.fit} /></h2>
+          <ul class="fit-grid">
+            {
+              service.fit.map((item, i) => (
+                <li class="fit-grid__item">
+                  <span class="fit-grid__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="fit-grid__text">{item}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <section class="service-block" aria-labelledby="service-how">
+          <h2 id="service-how" class="service-block__title"><Phrased text={ui.service.how} /></h2>
+          <ol class="service-block__methods">
+            {service.how.map((item, i) => <MethodRow index={i + 1} name={item.name} description={item.detail} compact />)}
+          </ol>
+        </section>
+      </div>
+    </Container>
+  </Section>
+
+  <Section tone="paper-2" labelledby="service-specs">
+    <Container>
+      <div class="specs-grid">
+        <div class="specs-grid__head">
+          <p class="eyebrow specs-grid__eyebrow">{service.name}</p>
+          <h2 id="service-specs" class="specs-grid__title t-h2"><Phrased text={ui.service.specs} /></h2>
+        </div>
+        <div class="specs-grid__sheet">
+          <SpecSheet rows={service.specs} wide />
+        </div>
+      </div>
+    </Container>
+  </Section>
+
+  <Section tone="paper">
+    <Container narrow>
+      <div class="service-stack">
+        <section class="service-block" aria-labelledby="service-notes">
+          <h2 id="service-notes" class="service-block__title"><Phrased text={ui.service.notes} /></h2>
+          <ul class="notes">{service.notes.map((item) => <li class="notes__item">{item}</li>)}</ul>
+        </section>
+
+        <section class="service-block" aria-labelledby="service-faq">
+          <h2 id="service-faq" class="service-block__title"><Phrased text={ui.service.faq} /></h2>
+          <FaqList items={service.faq} />
+        </section>
+      </div>
+    </Container>
+  </Section>
+</Base>
+
+<style>
+  .service-hero :global(.service-hero__head) {
+    margin-bottom: 0;
+  }
+  .service-stack {
+    display: grid;
+    gap: var(--s-8);
+  }
+  .service-block__title {
+    font-size: var(--t-h3);
+    margin-bottom: var(--s-5);
+  }
+
+  /* 適合什麼情況：兩欄短句，mono 編號 */
+  .fit-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0 var(--s-6);
+    border-top: 1px solid var(--line);
+  }
+  .fit-grid__item {
+    display: flex;
+    gap: var(--s-3);
+    align-items: baseline;
+    padding-block: var(--s-4);
+    border-bottom: 1px solid var(--line);
+  }
+  .fit-grid__num {
+    flex: none;
+    min-width: 2.2em;
+    font-family: var(--font-mono);
+    font-size: var(--t-label);
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 怎麼做：MethodRow 精簡版 */
+  .service-block__methods {
+    display: grid;
+  }
+
+  /* 規格選項：全寬兩欄，左標題 sticky */
+  .specs-grid {
+    display: grid;
+    gap: var(--s-6);
+  }
+  .specs-grid__eyebrow {
+    margin-bottom: var(--s-3);
+  }
+  /* 規格卡的 crop marks 需要外側空間 */
+  .specs-grid__sheet {
+    padding-inline: 12px;
+  }
+
+  /* 注意事項 */
+  .notes {
+    display: grid;
+    gap: var(--s-4);
+  }
+  .notes__item {
+    padding-left: var(--s-4);
+    border-left: 2px solid var(--ink);
+    max-width: 36em;
+    color: var(--ink-2);
+  }
+
+  /* 手機：規格卡的標籤改放在值的上方（7em 標籤欄會把值擠得太窄） */
+  @media (max-width: 639.98px) {
+    .specs-grid .specs-grid__sheet :global(.spec-sheet--wide .spec-sheet__row) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--s-1);
+    }
+  }
+  @media (min-width: 640px) {
+    .fit-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 900px) {
+    .service-stack {
+      gap: var(--s-9);
+    }
+    .specs-grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      gap: var(--s-8);
+      align-items: start;
+    }
+    .specs-grid__head {
+      position: sticky;
+      top: calc(var(--header-h) + var(--s-6));
+    }
+  }
+</style>

@@ -1,0 +1,27 @@
+---
+// 小標籤：pill、1px line、mono 12px（§3.3）
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<span class:list={['tag', className]}><slot /></span>
+
+<style>
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 2px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    font-family: var(--font-mono);
+    font-size: var(--t-label);
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    color: var(--ink-2);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+</style>

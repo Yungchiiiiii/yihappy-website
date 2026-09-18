@@ -1,0 +1,186 @@
+---
+import Container from './Container.astro';
+import ProcessStage from './ProcessStage.astro';
+import Section from './Section.astro';
+import SectionHead from './SectionHead.astro';
+import Step from './Step.astro';
+import { processSection } from '../data/home';
+import { processSteps } from '../data/process';
+
+// 首頁區 3「一張紙，怎麼變成一本書」（§5.1、§6）：全站唯一的 scroll-driven 序列。
+// 預設（JS 未啟用／reduced-motion）：舞台正常排在步驟前並顯示最終狀態，步驟正常排版。
+// script 啟用後在 .scroller 加 is-live：桌機左舞台 sticky、右欄每步 100vh；手機舞台 sticky 在頂端 42vh、每步 58vh。
+---
+
+<Section tone="paper-2" id={processSection.id} labelledby="process-title">
+  <Container>
+    <SectionHead id="process-title" eyebrow={processSection.eyebrow} title={processSection.title} />
+    <div class="scroller" data-process>
+      <div class="scroller__stage">
+        <div class="scroller__stage-box">
+          <ProcessStage />
+        </div>
+      </div>
+      <ol class="scroller__steps">
+        {
+          processSteps.map((step, i) => (
+            <Step index={i + 1} title={step.title} text={step.text} class="scroller__step" data-step={i} />
+          ))
+        }
+      </ol>
+    </div>
+  </Container>
+</Section>
+
+<script>
+  import { initProcessScroller } from '../scripts/process-scroller';
+  initProcessScroller();
+</script>
+
+<style>
+  /* ---- 預設版型（無 JS／reduced-motion）---- */
+  .scroller {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr); /* 不讓 SVG 的固有寬度撐開欄位（手機裁切模式） */
+    gap: var(--s-7);
+  }
+  .scroller__stage {
+    min-width: 0;
+  }
+  .scroller__stage-box {
+    width: 100%;
+  }
+  .scroller__steps {
+    display: grid;
+    gap: var(--s-6);
+  }
+  .scroller :global(.step__num),
+  .scroller :global(.step__title),
+  .scroller :global(.step__text) {
+    transition: color var(--dur-2) var(--ease);
+  }
+
+  /* ---- scroll 版型（script 加上 is-live）---- */
+  /* 手機：舞台 sticky 在 header 下方，高 42vh，滿版 paper-2 底讓步驟從下方捲過 */
+  .scroller.is-live {
+    gap: 0;
+  }
+  .scroller.is-live .scroller__stage {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 1;
+    height: 42vh;
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+    background: var(--paper-2);
+  }
+  /* 手機：舞台以高度為準填滿，左右多出的部分裁掉，讓紙張在小螢幕上大一點 */
+  .scroller.is-live .scroller__stage-box {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .scroller.is-live .scroller__stage-box :global(svg) {
+    height: 100%;
+    width: auto;
+    max-width: none;
+    /* SVG 比容器寬時置中裁切（容器是 block，overflow 會往右邊跑） */
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .scroller.is-live .scroller__steps {
+    gap: 0;
+  }
+  /* 每步至少 58vh；文字置中在舞台下方看得到的區域（padding-top = 舞台高度 + header），不會被 sticky 舞台蓋住 */
+  .scroller.is-live .scroller__steps :global(.scroller__step) {
+    min-height: 58vh;
+    padding-top: calc(42vh + var(--header-h));
+    padding-bottom: var(--s-7);
+    align-content: center;
+  }
+  /* 目前步驟：編號變紅；其他步驟文字 ink-3 */
+  .scroller.is-live :global(.scroller__step:not(.is-active) .step__title),
+  .scroller.is-live :global(.scroller__step:not(.is-active) .step__text) {
+    color: var(--ink-3);
+  }
+  .scroller.is-live :global(.scroller__step.is-active .step__num) {
+    color: var(--red);
+  }
+
+  @media (min-width: 900px) {
+    .scroller {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); /* 舞台佔多一點，步驟文字短 */
+      gap: var(--s-8);
+      align-items: start;
+    }
+    .scroller__stage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .scroller__stage-box {
+      max-width: 680px;
+    }
+    .scroller.is-live {
+      gap: var(--s-8);
+    }
+    .scroller.is-live .scroller__stage {
+      height: calc(100vh - var(--header-h));
+      margin-inline: 0;
+      padding-inline: 0;
+      background: none;
+    }
+    .scroller.is-live .scroller__stage-box {
+      display: block;
+      height: auto; /* 手機規則的 height:100% 會把 SVG 推到最上面，桌機改回由 flex 垂直置中 */
+      max-height: 100%;
+      overflow: visible;
+    }
+    .scroller.is-live .scroller__stage-box :global(svg) {
+      height: auto;
+      width: 100%;
+      max-width: 100%;
+      left: auto;
+      transform: none;
+    }
+    .scroller.is-live .scroller__steps :global(.scroller__step) {
+      min-height: 100vh;
+      padding-block: 0;
+    }
+  }
+
+  /* reduced-motion：即使 is-live 也退回預設版型（script 本身不會加 is-live） */
+  @media (prefers-reduced-motion: reduce) {
+    .scroller.is-live {
+      gap: var(--s-7);
+    }
+    .scroller.is-live .scroller__stage {
+      position: static;
+      height: auto;
+      margin-inline: 0;
+      padding-inline: 0;
+      background: none;
+    }
+    .scroller.is-live .scroller__steps {
+      gap: var(--s-6);
+    }
+    .scroller.is-live .scroller__steps :global(.scroller__step) {
+      min-height: auto;
+      padding-block: 0;
+    }
+    .scroller.is-live :global(.scroller__step:not(.is-active) .step__title),
+    .scroller.is-live :global(.scroller__step:not(.is-active) .step__text) {
+      color: inherit;
+    }
+    .scroller.is-live :global(.scroller__step:not(.is-active) .step__text) {
+      color: var(--ink-2);
+    }
+    @media (min-width: 900px) {
+      .scroller.is-live {
+        gap: var(--s-8);
+      }
+    }
+  }
+</style>

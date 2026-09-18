@@ -1,0 +1,138 @@
+---
+import Button from './Button.astro';
+import { company } from '../data/company';
+import { ui } from '../data/ui';
+
+// 行動版選單（≤ 900px）：漢堡按鈕 + 全寬面板（role=dialog）。行為在 src/scripts/mobile-menu.ts。
+const path = Astro.url.pathname;
+const isCurrent = (href: string): boolean => path === href || (href !== '/' && path.startsWith(href));
+---
+
+<button
+  class="menu-toggle"
+  type="button"
+  aria-expanded="false"
+  aria-controls="mobile-menu"
+  aria-label={ui.nav.menuOpen}
+  data-menu-toggle
+  data-close-label={ui.nav.menuClose}
+>
+  <svg class="menu-toggle__icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path class="menu-toggle__bar menu-toggle__bar--1" d="M3 7h18" />
+    <path class="menu-toggle__bar menu-toggle__bar--2" d="M3 12h18" />
+    <path class="menu-toggle__bar menu-toggle__bar--3" d="M3 17h18" />
+  </svg>
+</button>
+
+<div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label={ui.nav.mobileLabel} hidden data-menu-panel>
+  <nav class="mobile-menu__nav" aria-label={ui.nav.mobileLabel}>
+    <ul class="mobile-menu__list">
+      {
+        ui.nav.items.map((item) => (
+          <li>
+            <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="mobile-menu__actions">
+      <Button href={ui.cta.quote.href} variant="primary" size="lg">{ui.cta.quote.label}</Button>
+      <Button href={ui.cta.call.href} variant="secondary" size="lg">{ui.cta.call.label}</Button>
+    </div>
+    <a class="mobile-menu__email" href={`mailto:${company.email}`}>{company.email}</a>
+  </nav>
+</div>
+
+<style>
+  .menu-toggle {
+    display: none;
+    width: 48px;
+    height: 48px;
+    margin-right: -10px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    border-radius: var(--r-control);
+    color: var(--ink);
+  }
+  .menu-toggle__icon {
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    fill: none;
+  }
+  .menu-toggle__bar {
+    transform-origin: 12px 12px;
+    transition:
+      transform var(--dur-2) var(--ease),
+      opacity var(--dur-1) var(--ease);
+  }
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bar--1 {
+    transform: translateY(5px) rotate(45deg);
+  }
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bar--2 {
+    opacity: 0;
+  }
+  .menu-toggle[aria-expanded='true'] .menu-toggle__bar--3 {
+    transform: translateY(-5px) rotate(-45deg);
+  }
+
+  .mobile-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: calc(100vh - var(--header-h));
+    height: calc(100dvh - var(--header-h));
+    overflow-y: auto;
+    background: var(--paper);
+    box-shadow: var(--shadow-1);
+  }
+  .mobile-menu__nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-6);
+    max-width: var(--container);
+    margin-inline: auto;
+    padding: var(--s-4) var(--gutter) var(--s-8);
+  }
+  .mobile-menu__list a {
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    padding-block: var(--s-3);
+    border-bottom: 1px solid var(--line);
+    font-size: 1.25rem;
+    text-decoration: none;
+  }
+  .mobile-menu__list a[aria-current='page'] {
+    box-shadow: inset 0 -2px 0 var(--ink);
+  }
+  .mobile-menu__actions {
+    display: grid;
+    gap: var(--s-3);
+  }
+  .mobile-menu__email {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--font-mono);
+    font-size: var(--t-small);
+  }
+
+  @media (max-width: 899.98px) {
+    .menu-toggle {
+      display: inline-flex;
+    }
+  }
+  @media (min-width: 900px) {
+    .mobile-menu {
+      display: none !important;
+    }
+  }
+</style>

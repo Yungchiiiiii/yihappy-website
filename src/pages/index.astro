@@ -1,0 +1,208 @@
+---
+import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+import Container from '../components/Container.astro';
+import FactStrip from '../components/FactStrip.astro';
+import HeroSheet from '../components/HeroSheet.astro';
+import NeedCard from '../components/NeedCard.astro';
+import Phrased from '../components/Phrased.astro';
+import ProcessScroller from '../components/ProcessScroller.astro';
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import SpecSheet from '../components/SpecSheet.astro';
+import WhyList from '../components/WhyList.astro';
+import { company } from '../data/company';
+import { aboutSection, facts, hero, productsSection, specsSection, whySection } from '../data/home';
+import { needs } from '../data/needs';
+import { pageMeta } from '../data/pages';
+import { specSheets } from '../data/specSheets';
+
+// 首頁（§5.1）：區 1 Hero + 事實條、區 2 我要印什麼、區 3 ProcessScroller、區 4 為什麼找倚樂、
+// 區 5 常見做法、區 6 關於摘要、區 7 ContactCta（由 Base 帶入）。
+const websiteLd = {
+  '@type': 'WebSite',
+  '@id': `${company.url}/#website`,
+  url: `${company.url}/`,
+  name: company.name,
+  inLanguage: 'zh-TW',
+  publisher: { '@id': `${company.url}/#organization` },
+};
+---
+
+<Base title={pageMeta.home.title} description={pageMeta.home.description} path="/" jsonLd={[websiteLd]}>
+  <Section tone="paper" class="hero" labelledby="hero-title">
+    <Container>
+      <div class="hero__grid">
+        <div class="hero__copy">
+          <p class="eyebrow hero__eyebrow">{hero.eyebrow}</p>
+          <h1 id="hero-title" class="t-display hero__title"><Phrased text={hero.title} /></h1>
+          <p class="t-lede hero__lede">{hero.lede}</p>
+          <div class="hero__actions">
+            <Button href={hero.primary.href} variant="primary" size="lg">{hero.primary.label}</Button>
+            <Button href={hero.secondary.href} variant="secondary" size="lg">{hero.secondary.label}</Button>
+          </div>
+        </div>
+        <div class="hero__visual">
+          <HeroSheet />
+        </div>
+      </div>
+      <div class="hero__facts">
+        <FactStrip items={facts} />
+      </div>
+    </Container>
+  </Section>
+
+  <Section tone="white" id={productsSection.id} labelledby="products-title">
+    <Container>
+      <SectionHead
+        id="products-title"
+        eyebrow={productsSection.eyebrow}
+        title={productsSection.title}
+        lede={productsSection.lede}
+      />
+      <ul class="need-grid">
+        {
+          needs.map((need) => (
+            <li>
+              <NeedCard need={need} />
+            </li>
+          ))
+        }
+      </ul>
+      <p class="section-more">
+        <Button variant="text" href={productsSection.more.href} arrow>{productsSection.more.label}</Button>
+      </p>
+    </Container>
+  </Section>
+
+  <ProcessScroller />
+
+  <Section tone="paper" id={whySection.id} labelledby="why-title">
+    <Container>
+      <WhyList titleId="why-title" title={whySection.title} items={whySection.items} />
+    </Container>
+  </Section>
+
+  <Section tone="white" labelledby="specs-title">
+    <Container>
+      <SectionHead id="specs-title" eyebrow={specsSection.eyebrow} title={specsSection.title} lede={specsSection.lede} />
+      <ul class="spec-grid">
+        {
+          specSheets.map((sheet) => (
+            <li>
+              <SpecSheet id={`spec-${sheet.id}`} title={sheet.title} rows={sheet.rows} note={sheet.note} />
+            </li>
+          ))
+        }
+      </ul>
+      <p class="section-more">
+        <Button variant="text" href={specsSection.more.href} arrow>{specsSection.more.label}</Button>
+      </p>
+    </Container>
+  </Section>
+
+  <Section tone="paper-2" id={aboutSection.id} labelledby="about-title">
+    <Container>
+      <div class="about-summary">
+        <h2 id="about-title" class="t-h2 about-summary__title"><Phrased text={aboutSection.title} /></h2>
+        <div class="about-summary__body">
+          {aboutSection.paragraphs.map((text) => <p class="about-summary__text">{text}</p>)}
+          <p class="about-summary__more">
+            <Button variant="text" href={aboutSection.more.href} arrow>{aboutSection.more.label}</Button>
+          </p>
+        </div>
+      </div>
+    </Container>
+  </Section>
+</Base>
+
+<style>
+  .hero__grid {
+    display: grid;
+    gap: var(--s-7);
+    align-items: center;
+  }
+  .hero__eyebrow {
+    margin-bottom: var(--s-4);
+  }
+  .hero__lede {
+    margin-top: var(--s-5);
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    margin-top: var(--s-6);
+  }
+  .hero__visual {
+    order: 1;
+    display: flex;
+    justify-content: center;
+  }
+  .hero__facts {
+    margin-top: var(--s-8);
+  }
+  .need-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-4);
+  }
+  .section-more {
+    margin-top: var(--s-6);
+  }
+  /* 規格卡：crop marks 在卡片外 12px，行列間距要留得下 */
+  .spec-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-7) var(--s-6);
+    padding-block: 12px;
+  }
+  .about-summary {
+    display: grid;
+    gap: var(--s-6);
+  }
+  .about-summary__text {
+    max-width: 36em;
+    color: var(--ink-2);
+  }
+  .about-summary__text + .about-summary__text {
+    margin-top: var(--s-4);
+  }
+  .about-summary__more {
+    margin-top: var(--s-5);
+  }
+  @media (min-width: 640px) {
+    .need-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--s-5);
+    }
+    .spec-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 900px) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--s-8);
+    }
+    .hero__visual {
+      order: 0;
+      justify-content: flex-end;
+    }
+    .hero__facts {
+      margin-top: var(--s-9);
+    }
+    .need-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .spec-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--s-6);
+    }
+    .about-summary {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-9);
+      align-items: start;
+    }
+  }
+</style>

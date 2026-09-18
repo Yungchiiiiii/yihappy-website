@@ -1,0 +1,172 @@
+---
+// 單選／多選 chip（§5.5）：fieldset/legend + 視覺化的 <input type="radio|checkbox">（鍵盤可用；input 視覺隱藏、label 當 chip）。
+// variant=chip：pill 排列（類別、色數、加工、檔案狀態）；variant=segmented：連在一起的分段控制（快速試算的色彩）。
+// legendSize=section：段落標題（700）；label：欄位標籤（500）。
+interface Option {
+  value: string;
+  label: string;
+  checked?: boolean;
+  /** 額外 data-* 屬性（例如 data-mode） */
+  data?: Record<string, string>;
+}
+interface Props {
+  name: string;
+  legend: string;
+  options: readonly Option[];
+  /** input id 前綴：`${idPrefix}-${index}` */
+  idPrefix: string;
+  type?: 'radio' | 'checkbox';
+  variant?: 'chip' | 'segmented';
+  legendSize?: 'section' | 'label';
+  /** 純文字內容用的欄位鍵（quote-form.ts 讀 data-field／data-label） */
+  field?: string;
+  class?: string;
+}
+const {
+  name,
+  legend,
+  options,
+  idPrefix,
+  type = 'radio',
+  variant = 'chip',
+  legendSize = 'label',
+  field,
+  class: className,
+} = Astro.props;
+const sectionLegend = legendSize === 'section';
+---
+
+<fieldset
+  class:list={['chips', `chips--${variant}`, { 'chips--check': type === 'checkbox' }, className]}
+  data-field={field}
+  data-label={field ? legend : undefined}
+>
+  <legend
+    class:list={['chips__legend', sectionLegend ? 'chips__legend--section' : 'chips__legend--label']}
+    data-font={sectionLegend ? '700' : '500'}
+  >
+    {legend}
+  </legend>
+  <div class="chips__list">
+    {
+      options.map((opt, i) => {
+        const id = `${idPrefix}-${i}`;
+        const data = Object.fromEntries(Object.entries(opt.data ?? {}).map(([k, v]) => [`data-${k}`, v]));
+        return (
+          <div class="chip">
+            <input class="chip__input" type={type} id={id} name={name} value={opt.value} checked={opt.checked} {...data} />
+            <label class="chip__label" for={id}>
+              {opt.label}
+            </label>
+          </div>
+        );
+      })
+    }
+  </div>
+</fieldset>
+
+<style>
+  .chips {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  /* legend 浮動成一般區塊，才能當標題排版 */
+  .chips__legend {
+    float: left;
+    width: 100%;
+    padding: 0;
+    margin-bottom: var(--s-3);
+  }
+  .chips__legend--section {
+    font-size: var(--t-h3);
+    font-weight: 700;
+    line-height: var(--lh-heading);
+    margin-bottom: var(--s-5);
+  }
+  .chips__legend--label {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: var(--s-2);
+  }
+  .chips__list {
+    clear: both;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+  }
+  .chip {
+    position: relative;
+  }
+  /* input 視覺隱藏但保留在 tab 順序；label 當成 chip */
+  .chip__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+  .chip__label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: var(--s-2) var(--s-4);
+    background: var(--white);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    font-size: 0.9375rem;
+    line-height: 1.3;
+    color: var(--ink);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--dur-1) var(--ease),
+      border-color var(--dur-1) var(--ease),
+      color var(--dur-1) var(--ease);
+  }
+  .chip__label:hover {
+    border-color: var(--ink);
+  }
+  .chip__input:checked + .chip__label {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .chip__input:focus-visible + .chip__label {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .chips--check .chip__input:checked + .chip__label::before {
+    content: '✓';
+    margin-right: var(--s-2);
+  }
+
+  /* segmented：連在一起 */
+  .chips--segmented .chips__list {
+    display: inline-flex;
+    gap: 0;
+    background: var(--white);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-control);
+    overflow: hidden;
+  }
+  .chips--segmented .chip + .chip {
+    border-left: 1px solid var(--line-strong);
+  }
+  .chips--segmented .chip__label {
+    min-height: 40px;
+    padding-inline: 20px;
+    border: 0;
+    border-radius: 0;
+  }
+  .chips--segmented .chip__input:focus-visible + .chip__label {
+    outline-offset: -3px;
+  }
+</style>

@@ -1,0 +1,106 @@
+---
+import { quote } from '../data/quote';
+
+// 表單欄位包裝（§5.5、§9）：<label for> + 必填字樣 + 說明 + 控制項（slot）+ 錯誤訊息（hidden，由 quote-form.ts 開關）。
+// data-field／data-label 讓 quote-form.ts 組合純文字時直接讀欄位名稱，不必再帶一份文案到瀏覽器端。
+// label 帶 id="{id}-label"，同一欄位的第二個控制項（例如快速試算的 range）可用 aria-labelledby 指向它。
+// 控制項請加 class="control"（文字／數字／select／textarea），高度 44px；錯誤時 aria-invalid="true" 變紅框。
+interface Props {
+  id: string;
+  label: string;
+  /** 純文字內容用的欄位鍵（預設同 id） */
+  field?: string;
+  required?: boolean;
+  hint?: string;
+  /** 錯誤訊息（有給才輸出 <p id="{id}-error" hidden>） */
+  error?: string;
+  class?: string;
+}
+const { id, label, field = id, required = false, hint, error, class: className } = Astro.props;
+---
+
+<div class:list={['field', className]} data-field={field} data-label={label}>
+  <label for={id} id={`${id}-label`} class="field__label">
+    {label}
+    {required && <span class="field__req">{quote.requiredMark}</span>}
+  </label>
+  {hint && <p id={`${id}-hint`} class="field__hint">{hint}</p>}
+  <slot />
+  {error && <p id={`${id}-error`} class="field__error" hidden>{error}</p>}
+</div>
+
+<style>
+  .field {
+    display: grid;
+    gap: var(--s-2);
+    align-content: start;
+    min-width: 0;
+  }
+  .field__label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s-2);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .field__req {
+    font-family: var(--font-mono);
+    font-size: var(--t-label);
+    letter-spacing: 0.08em;
+    color: var(--red);
+  }
+  .field__hint {
+    font-size: var(--t-small);
+    line-height: 1.6;
+    color: var(--ink-3);
+  }
+  .field__error {
+    font-size: var(--t-small);
+    line-height: 1.6;
+    color: var(--error);
+  }
+
+  /* 控制項（文字／數字／select／textarea）：44px 高、白底、1px 線、6px 圓角；16px 字避免 iOS 放大 */
+  .field :global(.control) {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 var(--s-3);
+    background: var(--white);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-control);
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--ink);
+    transition: border-color var(--dur-1) var(--ease);
+  }
+  .field :global(textarea.control) {
+    padding: 10px var(--s-3);
+    line-height: 1.6;
+  }
+  .field :global(select.control) {
+    appearance: none;
+    padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none' stroke='%2317150F' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--s-3) center;
+    cursor: pointer;
+  }
+  .field :global(.control::placeholder) {
+    color: var(--ink-3);
+    opacity: 1;
+  }
+  .field :global(.control:hover) {
+    border-color: var(--ink);
+  }
+  .field :global(.control:focus-visible) {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+    border-color: var(--ink);
+  }
+  .field :global(.control[aria-invalid='true']) {
+    border-color: var(--error);
+    box-shadow: inset 0 0 0 1px var(--error);
+  }
+</style>

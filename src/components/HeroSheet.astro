@@ -1,0 +1,122 @@
+---
+import { heroSheet } from '../data/home';
+
+// Hero 右側視覺（§5.1）：一張靜態「已對位」的印刷紙張——4:5 的白紙（1px line 邊）、四角裁切線、
+// 左右對位標記、後方一張偏移的紙；紙上是簡化書封版面（墨色標題塊、灰線文字塊、紅色色帶）、
+// mono 規格行、底線與公司名／地點，下方一條印刷色條。靜態、不動畫；文字來自 data/home.ts。
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+const rows = heroSheet.rows.map((row, i) => ({ ...row, y: 392 + i * 24 }));
+const bar = ['c', 'm', 'y', 'k'] as const;
+---
+
+<svg
+  class:list={['hero-sheet', className]}
+  viewBox="0 0 480 560"
+  role="img"
+  aria-label={heroSheet.label}
+  focusable="false"
+>
+  <!-- 後方偏移的紙 -->
+  <rect class="hero-sheet__paper hero-sheet__paper--back" x="64" y="40" width="360" height="450" />
+  <!-- 主紙張 -->
+  <rect class="hero-sheet__paper" x="48" y="56" width="360" height="450" />
+  <!-- 四角裁切線 -->
+  <path class="hero-sheet__marks" d="M48 32v15M24 56h15M408 32v15M417 56h15M48 515v15M24 506h15M408 515v15M417 506h15" />
+  <!-- 左右對位標記 -->
+  <g class="hero-sheet__marks" transform="translate(28 281)"><circle r="5" /><path d="M-8 0h16M0 -8v16" /></g>
+  <g class="hero-sheet__marks" transform="translate(428 281)"><circle r="5" /><path d="M-8 0h16M0 -8v16" /></g>
+  <!-- 書封版面：標題塊、副標、文字塊 -->
+  <g class="hero-sheet__ink">
+    <rect x="88" y="104" width="196" height="30" />
+    <rect x="88" y="146" width="132" height="10" opacity=".8" />
+    <rect x="88" y="200" width="248" height="6" opacity=".55" />
+    <rect x="88" y="214" width="248" height="6" opacity=".55" />
+    <rect x="88" y="228" width="200" height="6" opacity=".55" />
+    <rect x="88" y="242" width="248" height="6" opacity=".55" />
+    <rect x="88" y="256" width="160" height="6" opacity=".55" />
+  </g>
+  <!-- 紅色色帶 -->
+  <rect class="hero-sheet__band" x="48" y="300" width="360" height="44" />
+  <!-- mono 規格行 -->
+  <g class="hero-sheet__mono">
+    {
+      rows.map((row) => (
+        <text x="88" y={row.y}>
+          <tspan>{row.label}</tspan>
+          <tspan class="hero-sheet__value" x="150">
+            {row.value}
+          </tspan>
+        </text>
+      ))
+    }
+    <line class="hero-sheet__rule" x1="88" y1="460" x2="368" y2="460" />
+    <text x="88" y="482">{heroSheet.footer.left}</text>
+    <text x="368" y="482" text-anchor="end">{heroSheet.footer.right}</text>
+  </g>
+  <!-- 印刷色條 -->
+  <g transform="translate(48 530)">
+    {bar.map((ink, i) => <rect class={`hero-sheet__ink-${ink}`} x={i * 18} width="18" height="8" />)}
+    {bar.map((ink, i) => <rect class={`hero-sheet__ink-${ink}`} x={72 + i * 18} width="18" height="8" opacity=".5" />)}
+  </g>
+</svg>
+
+<style>
+  .hero-sheet {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    overflow: visible;
+  }
+  .hero-sheet__paper {
+    fill: var(--white);
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+  .hero-sheet__paper--back {
+    opacity: 0.55;
+  }
+  .hero-sheet__marks {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1;
+  }
+  .hero-sheet__ink {
+    fill: var(--ink);
+  }
+  .hero-sheet__band {
+    fill: var(--red);
+  }
+  .hero-sheet__mono {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    fill: var(--ink-3);
+  }
+  .hero-sheet__value {
+    fill: var(--ink-2);
+  }
+  .hero-sheet__rule {
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+  .hero-sheet__ink-c {
+    fill: var(--c);
+  }
+  .hero-sheet__ink-m {
+    fill: var(--m);
+  }
+  .hero-sheet__ink-y {
+    fill: var(--y);
+  }
+  .hero-sheet__ink-k {
+    fill: var(--k);
+  }
+  @media (min-width: 640px) {
+    .hero-sheet {
+      max-width: 480px;
+    }
+  }
+</style>

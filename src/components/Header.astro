@@ -1,0 +1,110 @@
+---
+import Button from './Button.astro';
+import Container from './Container.astro';
+import Logo from './Logo.astro';
+import MobileMenu from './MobileMenu.astro';
+import { ui } from '../data/ui';
+
+// 固定 header：桌機 64px、手機 56px；紙色 92% + blur；捲動後底線（§3.3、§4）
+const path = Astro.url.pathname;
+const isCurrent = (href: string): boolean => path === href || (href !== '/' && path.startsWith(href));
+---
+
+<header class="site-header" data-site-header>
+  <Container>
+    <div class="site-header__bar">
+      <Logo class="site-header__logo" data-menu-inert />
+      <nav class="site-nav" aria-label={ui.nav.label}>
+        <ul class="site-nav__list">
+          {
+            ui.nav.items.map((item) => (
+              <li>
+                <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <div class="site-header__cta" data-menu-inert>
+        <Button href={ui.cta.quote.href} variant="primary" size="md" class="site-header__quote">
+          {ui.cta.quote.label}
+        </Button>
+      </div>
+      <MobileMenu />
+    </div>
+  </Container>
+</header>
+
+<script>
+  import { initHeader, initMobileMenu } from '../scripts/mobile-menu';
+  initHeader();
+  initMobileMenu();
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    height: var(--header-h);
+    background: rgba(248, 245, 239, 0.92);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    transition: box-shadow var(--dur-1) var(--ease);
+  }
+  .site-header[data-scrolled] {
+    box-shadow: 0 1px 0 var(--line);
+  }
+  .site-header__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--s-5);
+    height: var(--header-h);
+  }
+  .site-nav {
+    margin-left: auto;
+  }
+  .site-nav__list {
+    display: flex;
+    gap: var(--s-6);
+  }
+  .site-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-top: 2px;
+    border-bottom: 2px solid transparent;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    color: var(--ink);
+    transition: border-color var(--dur-1) var(--ease);
+  }
+  .site-nav a:hover {
+    border-bottom-color: var(--line-strong);
+  }
+  .site-nav a[aria-current='page'] {
+    border-bottom-color: var(--ink);
+  }
+  .site-header__cta {
+    display: flex;
+    align-items: center;
+  }
+
+  @media (max-width: 899.98px) {
+    .site-nav {
+      display: none;
+    }
+    .site-header__cta {
+      margin-left: auto;
+    }
+    .site-header :global(.site-header__quote) {
+      min-height: 40px;
+      padding-inline: 14px;
+      font-size: 0.875rem;
+    }
+  }
+</style>

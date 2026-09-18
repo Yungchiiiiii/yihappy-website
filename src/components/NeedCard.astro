@@ -1,0 +1,94 @@
+---
+import Icon from './Icon.astro';
+import { needMethodLabel } from '../data/needs';
+import type { Need } from '../data/types';
+
+// 「我要印…」卡（§3.3）：icon、標題、一句說明、mono「做法」一行；整卡可點（連結以 ::after 蓋滿卡片）
+interface Props {
+  need: Need;
+  headingLevel?: 'h2' | 'h3';
+}
+const { need, headingLevel: Heading = 'h3' } = Astro.props;
+---
+
+<article class="need-card">
+  <span class="need-card__icon" aria-hidden="true"><Icon name={need.icon} /></span>
+  <Heading class="need-card__title t-h3">
+    <a class="need-card__link" href={need.href}>{need.title}</a>
+  </Heading>
+  <p class="need-card__summary">{need.summary}</p>
+  <p class="need-card__method">
+    <span class="eyebrow">{needMethodLabel}</span>
+    <span class="need-card__method-text">{need.method}</span>
+  </p>
+</article>
+
+<style>
+  .need-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+    height: 100%;
+    padding: var(--s-5);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+    transition: border-color var(--dur-1) var(--ease);
+  }
+  .need-card__icon {
+    color: var(--ink);
+    margin-bottom: var(--s-1);
+  }
+  .need-card__title {
+    margin: 0;
+  }
+  .need-card__link {
+    text-decoration: none;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.15em;
+  }
+  /* 整卡可點 */
+  .need-card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .need-card__summary {
+    color: var(--ink-2);
+    font-size: var(--t-small);
+    line-height: 1.7;
+  }
+  .need-card__method {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s-1) var(--s-3);
+    margin-top: auto;
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--line);
+  }
+  .need-card__method-text {
+    font-family: var(--font-mono);
+    font-size: var(--t-small);
+    line-height: 1.6;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .need-card:has(.need-card__link:hover) {
+    border-color: var(--line-strong);
+  }
+  .need-card:has(.need-card__link:hover) .need-card__link {
+    text-decoration: underline;
+  }
+  @supports selector(:has(a)) {
+    .need-card__link:focus-visible {
+      outline: none;
+    }
+    .need-card:has(.need-card__link:focus-visible) {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
+    }
+  }
+</style>

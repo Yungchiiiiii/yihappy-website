@@ -1,0 +1,69 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'site：部署新站（dist/）；legacy：回滾到 legacy-site/'
+        type: choice
+        options:
+          - site
+          - legacy
+        default: site
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  TARGET: ${{ github.event.inputs.target || 'site' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - if: env.TARGET == 'site'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - if: env.TARGET == 'site'
+        run: npm ci
+
+      - if: env.TARGET == 'site'
+        run: npm run build
+
+      - if: env.TARGET == 'site'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      # 回滾：直接部署舊站檔案（legacy-site/ 內含 CNAME）
+      - if: env.TARGET == 'legacy'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: legacy-site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

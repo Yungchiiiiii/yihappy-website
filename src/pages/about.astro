@@ -1,0 +1,157 @@
+---
+import { Image } from 'astro:assets';
+import logoFull from '../assets/logo-full.png';
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Container from '../components/Container.astro';
+import ContactBlock from '../components/ContactBlock.astro';
+import Section from '../components/Section.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Step from '../components/Step.astro';
+import WhyList from '../components/WhyList.astro';
+import { about } from '../data/about';
+import { processSteps } from '../data/process';
+
+// 關於倚樂（§5.4）：H1 + lede → 我們在意什麼（同首頁區 4 版型）→ 我們怎麼跟你工作（五步）
+// → 設備與產線（<dl>，paper-2）→ 地點（ContactBlock + 完整 logo）→ ContactCta（Base 帶入）
+---
+
+<Base title={about.title} description={about.description} path={about.path}>
+  <Section tone="paper" labelledby="about-h1">
+    <Container>
+      <div class="page-head">
+        <Breadcrumb items={[{ label: about.name }]} />
+        <SectionHead as="h1" id="about-h1" title={about.h1} lede={about.lede} />
+      </div>
+    </Container>
+  </Section>
+
+  <Section tone="white" labelledby="values-title">
+    <Container>
+      <WhyList titleId="values-title" title={about.values.title} items={about.values.items} />
+    </Container>
+  </Section>
+
+  <Section tone="paper" labelledby="work-title">
+    <Container>
+      <SectionHead id="work-title" title={about.process.title} />
+      <ol class="work-steps">
+        {processSteps.map((step, i) => <Step index={i + 1} title={step.title} text={step.text} class="work-steps__item" />)}
+      </ol>
+    </Container>
+  </Section>
+
+  <Section tone="paper-2" labelledby="equipment-title">
+    <Container>
+      <SectionHead id="equipment-title" title={about.equipment.title} />
+      <dl class="equipment">
+        {
+          about.equipment.groups.map((group) => (
+            <div class="equipment__row">
+              <dt>{group.label}</dt>
+              <dd>{group.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p class="equipment__note">{about.equipment.note}</p>
+    </Container>
+  </Section>
+
+  <Section tone="paper" labelledby="location-title">
+    <Container>
+      <SectionHead id="location-title" title={about.location.title} />
+      <div class="location">
+        <ContactBlock class="location__contact" />
+        <div class="location__logo">
+          <Image src={logoFull} width={240} densities={[1, 2]} format="webp" alt={about.location.logoAlt} loading="lazy" />
+        </div>
+      </div>
+    </Container>
+  </Section>
+</Base>
+
+<style>
+  .page-head :global(.section-head) {
+    margin-bottom: 0;
+  }
+  .work-steps {
+    display: grid;
+    gap: var(--s-5);
+    max-width: var(--container-narrow);
+  }
+  .work-steps :global(.work-steps__item) {
+    padding-block: var(--s-5);
+    border-top: 1px solid var(--line);
+  }
+  .work-steps :global(.work-steps__item:last-child) {
+    border-bottom: 1px solid var(--line);
+  }
+  .equipment {
+    display: grid;
+    max-width: var(--container-narrow);
+    border-top: 1px solid var(--line);
+  }
+  .equipment__row {
+    display: grid;
+    grid-template-columns: 6em minmax(0, 1fr);
+    gap: var(--s-3);
+    padding-block: var(--s-4);
+    border-bottom: 1px solid var(--line);
+  }
+  .equipment__row dt {
+    font-family: var(--font-mono);
+    font-size: var(--t-label);
+    letter-spacing: 0.08em;
+    line-height: 1.8;
+    color: var(--ink-3);
+  }
+  .equipment__row dd {
+    line-height: 1.6;
+    font-variant-numeric: tabular-nums;
+  }
+  .equipment__note {
+    margin-top: var(--s-5);
+    max-width: 36em;
+    font-size: var(--t-small);
+    color: var(--ink-2);
+  }
+  .location {
+    display: grid;
+    gap: var(--s-7);
+    align-items: start;
+  }
+  .location__logo {
+    width: fit-content;
+    padding: var(--s-5);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+  }
+  .location__logo :global(img) {
+    display: block;
+    width: 240px;
+    max-width: 100%;
+    height: auto;
+  }
+  @media (min-width: 900px) {
+    .work-steps {
+      gap: 0;
+    }
+    .work-steps :global(.work-steps__item) {
+      padding-block: var(--s-6);
+    }
+    .equipment__row {
+      grid-template-columns: 9em minmax(0, 1fr);
+      gap: var(--s-5);
+      padding-block: var(--s-5);
+    }
+    .location {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--s-9);
+    }
+    .location__logo {
+      justify-self: end;
+    }
+  }
+</style>

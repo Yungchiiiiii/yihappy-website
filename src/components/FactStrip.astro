@@ -1,0 +1,70 @@
+---
+// Hero 下方事實條：4 格 mono label + 值，手機 2×2（§5.1）
+interface Props {
+  items: ReadonlyArray<{ label: string; value: string }>;
+  class?: string;
+}
+const { items, class: className } = Astro.props;
+---
+
+<dl class:list={['fact-strip', className]}>
+  {
+    items.map((item) => (
+      <div class="fact-strip__cell">
+        <dt>{item.label}</dt>
+        <dd>{item.value}</dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .fact-strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .fact-strip__cell {
+    padding: var(--s-4) var(--s-4) var(--s-4) 0;
+  }
+  .fact-strip__cell:nth-child(even) {
+    padding-left: var(--s-4);
+    border-left: 1px solid var(--line);
+  }
+  .fact-strip__cell:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+  .fact-strip dt {
+    font-family: var(--font-mono);
+    font-size: var(--t-label);
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+    color: var(--ink-3);
+    margin-bottom: var(--s-1);
+  }
+  .fact-strip dd {
+    font-size: var(--t-small);
+    line-height: 1.6;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (min-width: 900px) {
+    .fact-strip {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .fact-strip__cell {
+      padding: var(--s-5) var(--s-5) var(--s-5) 0;
+    }
+    .fact-strip__cell:nth-child(n + 2) {
+      padding-left: var(--s-5);
+      border-left: 1px solid var(--line);
+    }
+    .fact-strip__cell:nth-child(n + 3) {
+      border-top: 0;
+    }
+    .fact-strip dd {
+      font-size: var(--t-body-m);
+    }
+  }
+</style>

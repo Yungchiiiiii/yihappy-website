@@ -1,0 +1,37 @@
+---
+// 區塊：垂直 section-y，四種底色（§3.3）
+interface Props {
+  tone?: 'paper' | 'paper-2' | 'white' | 'ink';
+  id?: string;
+  class?: string;
+  /** 指向區塊標題的 id，讓 section 成為具名 region */
+  labelledby?: string;
+}
+const { tone = 'paper', id, class: className, labelledby } = Astro.props;
+---
+
+<section
+  id={id}
+  class:list={['section', `section--${tone}`, { 'on-ink': tone === 'ink' }, className]}
+  aria-labelledby={labelledby}
+>
+  <slot />
+</section>
+
+<style>
+  .section {
+    padding-block: var(--section-y);
+  }
+  .section--paper {
+    background: var(--paper);
+  }
+  .section--paper-2 {
+    background: var(--paper-2);
+  }
+  .section--white {
+    background: var(--white);
+  }
+  .section--ink {
+    background: var(--ink);
+  }
+</style>

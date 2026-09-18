@@ -1,0 +1,41 @@
+---
+// 流程步驟（§3.3）：mono 編號、標題、說明。渲染為 <li>，父層請用 <ol>。
+interface Props {
+  index: number;
+  title: string;
+  text: string;
+  class?: string;
+  [key: `data-${string}`]: string | number | undefined;
+}
+const { index, title, text, class: className, ...rest } = Astro.props;
+const number = String(index).padStart(2, '0');
+---
+
+<li class:list={['step', className]} {...rest}>
+  <span class="step__num" aria-hidden="true">{number}</span>
+  <div class="step__body">
+    <h3 class="step__title t-h3">{title}</h3>
+    <p class="step__text">{text}</p>
+  </div>
+</li>
+
+<style>
+  .step {
+    display: grid;
+    grid-template-columns: 2.5em minmax(0, 1fr);
+    gap: var(--s-3);
+    align-items: baseline;
+  }
+  .step__num {
+    font-family: var(--font-mono);
+    font-size: var(--t-label);
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .step__text {
+    margin-top: var(--s-2);
+    max-width: 36em;
+    color: var(--ink-2);
+  }
+</style>
