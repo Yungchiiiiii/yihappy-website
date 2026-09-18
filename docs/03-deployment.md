@@ -8,6 +8,13 @@
 - Production commit（舊站）：`de6a0cb99fc169024141b5cb439b021d04603b02`（`docs/PRODUCTION_BASELINE.txt`）。
 - 舊站完整檔案保留在 `legacy-site/`（`index.html`、`logo-new.png`、`logo.svg`、`robots.txt`、`sitemap.xml`、`CNAME`）。
 
+## 部署規則（2026-09-18 起）
+
+- 根目錄 `DEPLOY_TARGET` 檔案決定 push 到 `main` 時部署哪一版：`legacy`＝舊站（`legacy-site/`）、`site`＝新站（`dist/`）。
+- **合併 PR 不等於上架**：只要 `DEPLOY_TARGET` 是 `legacy`，正式站就維持舊站，新版可以在 `main` 上慢慢修。
+- 正式上架只有一種方式：老闆看過預覽並同意後，把 `DEPLOY_TARGET` 改成 `site` 並合併（或在 Actions 手動 Run workflow 選 `site`）。AI agent 不得自行把 `DEPLOY_TARGET` 改成 `site`。
+- 預覽方式：每一輪修改都會提供（1）私人預覽網頁連結（Claude Artifact，整站可點）與（2）五種寬度截圖，看過再決定。
+
 ## 新版部署方式
 
 新版是 Astro 靜態網站，需要 build，因此 Pages Source 改為 **GitHub Actions**：

@@ -1,5 +1,10 @@
 name: Deploy
 
+# 正式站部署規則
+# - push 到 main：依根目錄 DEPLOY_TARGET 檔案決定部署哪一版（legacy＝舊站 legacy-site/；site＝新站 dist/）。
+#   合併任何 PR 都不會把新站推上正式站，除非同一個 commit 把 DEPLOY_TARGET 改成 site。
+# - 手動 Run workflow：以輸入的 target 為準（回復舊站或臨時上架都可以）。
+
 on:
   push:
     branches:
@@ -7,12 +12,12 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'site：部署新站（dist/）；legacy：回滾到 legacy-site/'
+        description: 'site：部署新站（dist/）；legacy：部署舊站（legacy-site/）'
         type: choice
         options:
-          - site
           - legacy
-        default: site
+          - site
+        default: legacy
 
 permissions:
   contents: read
@@ -23,37 +28,50 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
-env:
-  TARGET: ${{ github.event.inputs.target || 'site' }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      target: ${{ steps.target.outputs.target }}
     steps:
       - uses: actions/checkout@v4
 
+      - id: target
+        name: 決定部署目標
+        env:
+          DISPATCH_TARGET: ${{ github.event.inputs.target }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            t="$DISPATCH_TARGET"
+          else
+            t="$(tr -d '[:space:]' < DEPLOY_TARGET 2>/dev/null || true)"
+          fi
+          case "$t" in site|legacy) ;; *) t=legacy ;; esac
+          echo "target=$t" >> "$GITHUB_OUTPUT"
+          echo "部署目標：$t" >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/configure-pages@v5
 
-      - if: env.TARGET == 'site'
+      - if: steps.target.outputs.target == 'site'
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: npm
 
-      - if: env.TARGET == 'site'
+      - if: steps.target.outputs.target == 'site'
         run: npm ci
 
-      - if: env.TARGET == 'site'
+      - if: steps.target.outputs.target == 'site'
         run: npm run build
 
-      - if: env.TARGET == 'site'
+      - if: steps.target.outputs.target == 'site'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
-      # 回滾：直接部署舊站檔案（legacy-site/ 內含 CNAME）
-      - if: env.TARGET == 'legacy'
+      # 舊站：直接部署 legacy-site/（內含 CNAME）
+      - if: steps.target.outputs.target == 'legacy'
         uses: actions/upload-pages-artifact@v3
         with:
           path: legacy-site
