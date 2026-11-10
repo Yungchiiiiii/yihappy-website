@@ -412,7 +412,6 @@ section { padding: clamp(80px, 10vw, 140px) 0; position: relative; z-index: 2; }
   .hp-text .num { font-size: 52px; }
   .hp-text h3 { margin-top: 8px; }
   .hp-text p { font-size: 15px; margin-top: 12px; }
-  .why-grid { grid-template-columns: 1fr; }
   .modal { grid-template-columns: 1fr; }
   .hero-meta { grid-template-columns: 1fr 1fr; }
 }
