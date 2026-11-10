@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://yihappy.com.tw/sitemap-index.xml
