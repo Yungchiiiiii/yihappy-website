@@ -55,28 +55,30 @@ function LoopVideo({ name }) {
   );
 }
 
-// 流程：橫向排列，往下捲一段就畫一段（米白底、黑線）
+// 流程：直向排列，每一步捲進畫面時就把線稿畫出來（米白底、黑線）
 // .d 會依序被「畫」出來；data-role 的部件在畫完後跟著捲動動起來
+// 左邊的時間軸線會跟著往下長，底部的箭頭在停下來時提示「下面還有」
 function ProcessScroller() {
   const wrap = React.useRef(null);
-  const track = React.useRef(null);
-  const bar = React.useRef(null);
 
   React.useEffect(() => {
-    const W = wrap.current, T = track.current;
-    if (!W || !T) return;
+    const W = wrap.current;
+    if (!W) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
     const seg = (v, a, b) => clamp((v - a) / (b - a));
     const ease = (t) => t * t * (3 - 2 * t);
     const lerp = (a, b, t) => a + (b - a) * t;
 
-    let shown = 0;
-    const panels = [...T.querySelectorAll(".hp-panel")];
+    const panels = [...W.querySelectorAll(".hp-step")];
     const N = panels.length;
     const parts = panels.map(() => null);
-    const segs = [...bar.current.querySelectorAll(".hp-seg i")];
-    const labels = [...bar.current.querySelectorAll(".hp-seg")];
+    const shown = panels.map(() => 0);
+    const drawn = panels.map(() => -1);
+    const arts = panels.map((pn) => pn.querySelector(".hp-art"));
+    const dots = panels.map((pn) => pn.querySelector(".hp-dot"));
+    const rail = W.querySelector(".hp-rail"), fill = rail.querySelector("i");
+    const cue = W.querySelector(".hp-cue");
 
     // 插圖是 media/art/proc-N.svg（由 build.py 產生），載入後直接放進頁面才能逐筆畫線
     function mount(i, svgText) {
@@ -88,11 +90,13 @@ function ProcessScroller() {
       if (q("book") && q("boxfront")) q("boxfront").parentNode.insertBefore(q("book"), q("boxfront"));
       const lines = [...svg.querySelectorAll(".d, .f, .h")];
       lines.forEach((el) => { el.setAttribute("pathLength", "1"); el.style.strokeDasharray = "1 1"; });
+      // 有底色的形狀（擋住後方線條用）跟著線條一起出現，還沒畫之前不要先看到一塊塊底色
+      const filled = lines.filter((el) => { const f = el.getAttribute("fill"); return f && f !== "none"; });
       const vec = (el, a = "x", b = "y") => el ? [+el.dataset[a], +el.dataset[b]] : [0, 0];
       const pair = (v) => (v || "0,0").split(",").map(Number);
       const axes = q("axes");
       parts[i] = {
-        lines, q,
+        lines, q, filled: new Set(filled),
         texts: [...svg.querySelectorAll(".tx")].filter((t) => !t.closest('[data-role="stamp"]')),
         swatches: [...svg.querySelectorAll(".sw")],
         dots: [...svg.querySelectorAll(".dot")],
@@ -105,15 +109,12 @@ function ProcessScroller() {
         o: axes && axes.dataset.o ? pair(axes.dataset.o) : null,
         flaps: [...svg.querySelectorAll('[data-role^="flap"]')].map((el) => ({ el, frames: JSON.parse(el.dataset.frames), t0: +el.dataset.t0, t1: +el.dataset.t1 })),
       };
-      draw(shown);
+      drawn[i] = -1;
+      render(i);
     }
     panels.forEach((pn, i) => {
-      fetch(pn.querySelector(".hp-art").dataset.src).then((r) => r.text()).then((t) => mount(i, t)).catch(() => {});
+      fetch(arts[i].dataset.src).then((r) => r.text()).then((t) => mount(i, t)).catch(() => {});
     });
-
-    // 時間軸：每段「畫」1 單位、「滑到下一段」0.55 單位
-    const DRAW = 1, SLIDE = 0.55, TOTAL = N * DRAW + (N - 1) * SLIDE + 0.25;
-    const startOf = (i) => i * (DRAW + SLIDE);
 
     function animate(i, dp) {
       const P = parts[i];
@@ -123,6 +124,8 @@ function ProcessScroller() {
       P.lines.forEach((el, k) => {
         const a = clamp((local - (k / n) * 0.7) / 0.3);
         el.style.strokeDashoffset = 1 - a;
+        el.style.visibility = a > 0.002 ? "" : "hidden"; // 還沒開始畫的線藏起來，不然圓角線頭會先露出一個黑點
+        if (P.filled.has(el)) el.style.fillOpacity = a;
       });
       P.texts.forEach((t) => (t.style.opacity = seg(local, 0.55, 0.85)));
       const m = seg(dp, 0.62, 1); // 畫完之後的動作
@@ -187,82 +190,124 @@ function ProcessScroller() {
       }
     }
 
-    function draw(p) {
-      const u = p * TOTAL;
-      // 鏡頭位置：第幾段 + 滑動中的比例
-      let pos = 0;
-      for (let i = 0; i < N - 1; i++) {
-        const s = startOf(i) + DRAW;
-        pos += ease(seg(u, s, s + SLIDE));
-      }
-      const a = Math.floor(pos), f = pos - a;
-      const x0 = panels[a].offsetLeft, x1 = panels[Math.min(N - 1, a + 1)].offsetLeft;
-      T.style.transform = `translate3d(${-lerp(x0, x1, f) + panels[0].offsetLeft}px,0,0)`;
-      const active = Math.round(pos);
-      panels.forEach((pn, i) => {
-        const dp = reduce ? 1 : seg(u, startOf(i) - SLIDE * 0.6, startOf(i) + DRAW);
-        animate(i, dp);
-        pn.classList.toggle("on", i === active);
-        pn.classList.toggle("past", i < active);
-        segs[i].style.transform = `scaleX(${seg(u, startOf(i) - SLIDE * 0.6, startOf(i) + DRAW)})`;
-        labels[i].classList.toggle("on", i === active);
+    // 每一步的進度：左邊圓點變黑（圓點捲到畫面 55% 高度）時開始畫，插圖中心捲到畫面 42% 高度時畫完
+    // 一進頁面就已經過了起點的步驟，從「現在的位置」才開始算，所以沒往下滑之前一筆都不會畫
+    // 每一步捲到畫面上方一點會停住（sticky），停住的這段捲動距離拿來慢慢畫，畫完才往上離開
+    // 進度用「這一步的頂端位置 T」算：圓點捲到畫面 55% 時開始，快要解除停住時畫完
+    const pins = panels.map((pn) => pn.querySelector(".hp-pin"));
+    const range = (i) => {
+      const vh = innerHeight, st = panels[i].getBoundingClientRect(), pin = pins[i].getBoundingClientRect();
+      const d = dots[i].getBoundingClientRect();
+      const pinTop = parseFloat(getComputedStyle(pins[i]).top) || 0;
+      const cs = getComputedStyle(panels[i]);
+      const head = parseFloat(cs.paddingTop) || 0, foot = parseFloat(cs.paddingBottom) || 0;
+      const dotOff = head + d.top + d.height / 2 - pin.top;            // 圓點離這一步頂端多遠（還沒停住時）
+      const Ts = Math.min(vh * 0.55 - dotOff, st.top + scrollY);       // 一進頁面就已經過了起點的話，從目前位置才開始
+      const Te = pinTop + pin.height + foot - st.height + vh * 0.08;   // 解除停住前一點點畫完
+      return { T: st.top, Ts, Te: Math.min(Te, Ts - vh * 0.5) };
+    };
+    // 停住的位置：整步在畫面裡上下置中再偏下一點，但不能被上方選單蓋到
+    function placePins() {
+      const vh = innerHeight, minTop = innerWidth <= 980 ? 96 : 120;
+      pins.forEach((pin) => {
+        const h = pin.getBoundingClientRect().height;
+        pin.style.top = Math.round(Math.max(minTop, Math.min((vh - h) / 2 + vh * 0.04, vh - h - 48))) + "px";
       });
     }
+    const targetOf = (i) => {
+      const { T, Ts, Te } = range(i);
+      return clamp((Ts - T) / (Ts - Te));
+    };
+    function render(i) {
+      const dp = reduce ? 1 : (window.__hpLock ? window.__hpLock[i] ?? shown[i] : shown[i]);
+      if (Math.abs(dp - drawn[i]) < 0.0005) return;
+      drawn[i] = dp;
+      animate(i, dp);
+    }
+
+    // 時間軸：某一步開始畫，它的圓點就變黑；線跟著那一步畫的進度，往下一個圓點長過去
+    function updateRail() {
+      const base = W.getBoundingClientRect().top;
+      const dotY = dots.map((d) => { const r = d.getBoundingClientRect(); return r.top + r.height / 2 - base; });
+      const top = dotY[0], len = Math.max(1, dotY[N - 1] - dotY[0]);
+      rail.style.top = top + "px"; rail.style.height = len + "px";
+      let k = -1;
+      shown.forEach((v, i) => { if (v > 0.001) k = i; });
+      const end = reduce ? dotY[N - 1] : k < 0 ? top : dotY[k] + (k < N - 1 ? (dotY[k + 1] - dotY[k]) * shown[k] : 0);
+      fill.style.transform = `scaleY(${clamp((end - top) / len)})`;
+      dots.forEach((d, i) => d.classList.toggle("on", reduce || shown[i] > 0.001));
+    }
+
+    // 往下的箭頭：停下來一下、而且下面還有步驟沒看完時才出現；一捲動就收起來
+    let idle = 0, cueOn = false;
+    const moreBelow = () => {
+      const w = W.getBoundingClientRect();
+      if (w.top > innerHeight || w.bottom < innerHeight * 0.5) return false;
+      return shown[N - 1] < 0.97;
+    };
+    const setCue = (v) => { if (v !== cueOn) { cueOn = v; cue.classList.toggle("show", v); } };
+    const armCue = (ms) => { clearTimeout(idle); idle = setTimeout(() => setCue(moreBelow()), ms); };
+    // 點箭頭：捲到下一個還沒畫完的步驟
+    const nextStep = () => {
+      const i = shown.findIndex((s) => s < 0.97);
+      const { T, Te } = range(i < 0 ? N - 1 : i);
+      scrollTo({ top: scrollY + (T - Te), behavior: reduce ? "auto" : "smooth" });
+    };
+    cue.addEventListener("click", nextStep);
 
     let raf = 0;
-    const target = () => {
-      const r = W.getBoundingClientRect();
-      const lead = innerHeight * 0.55; // 還沒釘住前就開始畫第一段
-      return clamp((lead - r.top) / (W.offsetHeight - innerHeight + lead));
+    const update = (k) => {
+      for (let i = 0; i < N; i++) {
+        const t = targetOf(i);
+        shown[i] += (t - shown[i]) * k;
+        if (Math.abs(t - shown[i]) < 0.0004) shown[i] = t;
+        render(i);
+      }
+      updateRail();
     };
-    const tick = () => {
-      const t = window.__hpLock ?? target();
-      shown += (t - shown) * (reduce ? 1 : 0.14);
-      if (Math.abs(t - shown) < 0.0004) shown = t;
-      draw(shown);
-      raf = requestAnimationFrame(tick);
-    };
-    const onScroll = () => { const t = window.__hpLock ?? target(); shown = shown + (t - shown) * 0.5; draw(shown); };
+    const tick = () => { update(reduce ? 1 : 0.16); raf = requestAnimationFrame(tick); };
+    const onScroll = () => { update(0.5); setCue(false); armCue(1300); };
+    const onResize = () => { placePins(); update(1); };
+    placePins();
+    update(1);
     raf = requestAnimationFrame(tick);
     addEventListener("scroll", onScroll, { passive: true });
-    addEventListener("resize", onScroll);
-    draw(target());
-    window.__hpDraw = (p) => { window.__hpLock = p; shown = p; draw(p); };
-    // 點下方的段落標籤，捲到那一段
-    window.__hpJump = (i) => {
-      const u = startOf(i) + DRAW * 0.98;
-      const lead = innerHeight * 0.55;
-      const total = W.offsetHeight - innerHeight + lead;
-      const top = W.getBoundingClientRect().top + scrollY;
-      scrollTo({ top: top - lead + (u / TOTAL) * total, behavior: "smooth" });
+    addEventListener("resize", onResize);
+    // 插圖載入、字型換好後高度會變，時間軸要重新量
+    const ro = new ResizeObserver(() => { placePins(); updateRail(); });
+    ro.observe(W);
+    armCue(900);
+    // 測試用：__hpDraw([0..1, ...]) 鎖定每一步的進度
+    window.__hpDraw = (arr) => { window.__hpLock = arr; drawn.fill(-1); for (let i = 0; i < N; i++) render(i); };
+    return () => {
+      cancelAnimationFrame(raf); clearTimeout(idle); ro.disconnect();
+      removeEventListener("scroll", onScroll); removeEventListener("resize", onResize);
+      cue.removeEventListener("click", nextStep);
     };
-    return () => { cancelAnimationFrame(raf); removeEventListener("scroll", onScroll); removeEventListener("resize", onScroll); };
   }, []);
 
   return (
-    <div className="hp" ref={wrap}>
-      <div className="hp-sticky">
-        <div className="hp-track" ref={track}>
-          {PROCESS.map((s, i) => (
-            <article className="hp-panel" key={s.num}>
+    <div className="container">
+      <div className="hp" ref={wrap}>
+        <div className="hp-rail" aria-hidden="true"><i></i></div>
+        {PROCESS.map((s, i) => (
+          <article className="hp-step" key={s.num}>
+            <div className="hp-pin">
               <div className="hp-text">
+                <span className="hp-dot" aria-hidden="true"></span>
                 <div className="num">{s.num}</div>
                 <h3>{s.zh}</h3>
                 <div className="en">{s.en}</div>
                 <p>{s.desc}</p>
               </div>
               <div className="hp-art" data-src={`media/art/proc-${i + 1}.svg`}></div>
-            </article>
-          ))}
-        </div>
-        <div className="hp-bar container" ref={bar}>
-          {PROCESS.map((s, i) => (
-            <button type="button" className="hp-seg" key={s.num} onClick={() => window.__hpJump && window.__hpJump(i)}>
-              <span className="bar"><i></i></span>
-              <span className="t"><b>{s.num}</b>{s.zh}</span>
-            </button>
-          ))}
-        </div>
+            </div>
+            <div className="hp-hold" aria-hidden="true"></div>
+          </article>
+        ))}
+        <button type="button" className="hp-cue" aria-label="往下看下一步">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9.5l6 6 6-6" /></svg>
+        </button>
       </div>
     </div>
   );

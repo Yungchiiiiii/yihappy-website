@@ -88,6 +88,29 @@ class Scene:
             self.poly([(x, Y, z), (X, Y, z), (X, Y, Z), (x, Y, Z)], cls)
         if "t" in faces:
             self.poly([(x, y, Z), (X, y, Z), (X, Y, Z), (x, Y, Z)], cls)
+        # 流程圖：整塊物件的外輪廓再描一次粗線，內部的折線維持細，立體感比較清楚
+        # 只有三面都畫的完整方塊才自動描外框；少一面的（開口箱子、另外畫出紙口的機器）外框會橫跨缺的那一面
+        if self.mode == "paper" and cls == "d" and set(faces) == set("tlr"):
+            C = []
+            if "r" in faces: C += [(X, y, z), (X, Y, z), (X, Y, Z), (X, y, Z)]
+            if "l" in faces: C += [(x, Y, z), (X, Y, z), (X, Y, Z), (x, Y, Z)]
+            if "t" in faces: C += [(x, y, Z), (X, y, Z), (X, Y, Z), (x, Y, Z)]
+            self.outline([self.p(*q) for q in C])
+        elif self.mode == "paper" and cls == "d" and "l" in faces and "r" in faces:
+            self.outline_path([(x, Y, Z), (x, Y, z), (X, Y, z), (X, y, z), (X, y, Z)])
+
+    def outline(self, P, min_size=16):
+        H = self.hull(P)
+        if len(H) < 3:
+            return
+        xs, ys = [q[0] for q in H], [q[1] for q in H]
+        if math.hypot(max(xs) - min(xs), max(ys) - min(ys)) < min_size:
+            return  # 小零件（按鈕、標籤）不加粗框，免得變成一團
+        self.add('<path class="d o" fill="none" d="M' + " L".join(f"{f(a)} {f(b)}" for a, b in H) + 'Z"/>')
+
+    def outline_path(self, ps, close=False):
+        """照著給的 3D 點描一條外輪廓粗線（形狀不是凸的、或不想封口時用）。"""
+        self.add('<path class="d o" fill="none" d="M' + " L".join(f"{f(a)} {f(b)}" for a, b in (self.p(*q) for q in ps)) + ('Z"/>' if close else '"/>'))
 
     def circle_pts(self, kind, cx, cy, c, r, n=56, a0=0, a1=360):
         out = []
@@ -138,6 +161,8 @@ class Scene:
         self.add(f'<path class="{cls}" d="{s}" fill="{self.fill}"/>')
         if cap:
             self.ellipse(kind, a, b, cc, r, cls)
+        if self.mode == "paper" and cls == "d":
+            self.outline(H)
 
     def text(self, kind, c, u, v, s, size=7, cls="tx", anchor="start", weight=None):
         m = self.plane(kind, c)
@@ -145,6 +170,13 @@ class Scene:
             m, u = (-m[0], -m[1], m[2], m[3], m[4], m[5]), -u
         w = f' font-weight="{weight}"' if weight else ""
         self.add(f'<text class="{cls}" transform="{self.mtx(m)}" x="{f(u)}" y="{f(v)}" font-size="{size}" text-anchor="{anchor}"{w}>{s}</text>')
+
+    def sticker(self, kind, c, u, v, w, rot=0):
+        """公司 logo 貼紙：貼在某個面上（跟著那個面的透視），稍微歪一點像手貼的。"""
+        h = w * 214 / 346
+        m = self.plane(kind, c)
+        self.add(f'<g class="tx" transform="{self.mtx(m)}"><image href="media/art/sticker-logo.png" x="{f(u)}" y="{f(v)}" width="{f(w)}" height="{f(h)}"'
+                 f' transform="rotate({rot} {f(u + w / 2)} {f(v + h / 2)})" preserveAspectRatio="xMidYMid meet"/></g>')
 
     def raw(self, s):
         self.add(s)
@@ -481,9 +513,9 @@ def proc_brief():
     for v in rows:
         S.path3([(cx + 12.8, v - 2.2, 2.5), (cx + 14.2, v - 0.6, 2.5), (cx + 17.6, v - 5.4, 2.5)], "d ck")
     # 對話框（平面，不做透視）
-    S.raw('<path class="d" fill="#F4EFE6" d="M96 34H232Q248 34 248 50V86Q248 102 232 102H140L112 124L118 102H96Q80 102 80 86V50Q80 34 96 34Z"/>')
+    S.raw('<path class="d o" fill="#F4EFE6" d="M96 34H232Q248 34 248 50V86Q248 102 232 102H140L112 124L118 102H96Q80 102 80 86V50Q80 34 96 34Z"/>')
     S.raw('<path class="f" d="M100 56H226M100 70H206M100 84H170"/>')
-    S.raw('<g transform="translate(60 0)"><path class="d" fill="#F4EFE6" d="M446 52H550Q566 52 566 68V96Q566 112 550 112H530L544 134L506 112H446Q430 112 430 96V68Q430 52 446 52Z"/>'
+    S.raw('<g transform="translate(60 0)"><path class="d o" fill="#F4EFE6" d="M446 52H550Q566 52 566 68V96Q566 112 550 112H530L544 134L506 112H446Q430 112 430 96V68Q430 52 446 52Z"/>'
           '<circle class="dot" cx="474" cy="82" r="3.6"/><circle class="dot" cx="498" cy="82" r="3.6"/><circle class="dot" cx="522" cy="82" r="3.6"/></g>')
     S.save("proc-1.svg", "需求洽談：規格單、樣書、色票")
 
@@ -619,6 +651,7 @@ def proc_press():
     hole = [(px1, gy0, gz0), (px1, gy1, gz0), (px1, gy1, gz1), (px1, gy0, gz1)]
     S.add(f'<path class="d" fill-rule="evenodd" fill="{PAPER}" d="{sp(face)} {sp(hole)}"/>')
     S.poly([(px1, gy0 + 2.5, gz0), (px1, gy1 - 2.5, gz0), (px1, gy1 - 2.5, gz1 - 2.5), (px1, gy0 + 2.5, gz1 - 2.5)], "h", fill=False)
+    S.outline([S.p(xx, yy, zz) for xx in (px0, px1) for yy in (py0, py1) for zz in (0, ph)])
     # ---------- 後方較低的平台：接住推出來的整疊 ----------
     cx0, cx1, cy0, cy1, ch = px1, px1 + 96, py0 + 6, py1 - 6, gz0
     S.box(cx0, cy0, 0, cx1 - cx0, cy1 - cy0, ch)
@@ -665,10 +698,18 @@ def proc_pack():
     S.box(bx, by, 0, bw, bd, bh, "d", faces="lr")
     S.raw("</g>")
     S.line((bx + bw, by + bd, 8), (bx + bw, by + bd, bh - 8), "h")
-    S.text("xz", by + bd, bx + 10, -16, "倚樂 · 小心輕放", size=6.4)
-    S.poly([(bx + 64, by + bd, 10), (bx + 86, by + bd, 10), (bx + 86, by + bd, 26), (bx + 64, by + bd, 26)], "f", fill=False)
-    S.path3([(bx + 75, by + bd, 13), (bx + 75, by + bd, 23)], "f")
-    S.path3([(bx + 71, by + bd, 19), (bx + 75, by + bd, 23), (bx + 79, by + bd, 19)], "f")
+    S.sticker("xz", by + bd, bx + 8, -50, 46, rot=-4)
+    # 「小心輕放」易碎貼紙：白底、紅框、兩個向上箭頭
+    m = S.plane("xz", by + bd)
+    u0, v0, w, h, RED = bx + 60, -31, 28, 23, "#C4122F"
+    cx = u0 + w / 2
+    arrows = "".join(f'<path d="M{f(ax)} {f(v0 + 13.2)}V{f(v0 + 4.6)}M{f(ax - 2.6)} {f(v0 + 7.2)}L{f(ax)} {f(v0 + 4.4)}L{f(ax + 2.6)} {f(v0 + 7.2)}"/>' for ax in (cx - 4.2, cx + 4.2))
+    S.raw(f'<g class="tx" transform="{S.mtx(m)}"><g transform="rotate(3 {f(cx)} {f(v0 + h / 2)})">'
+          f'<rect x="{f(u0)}" y="{f(v0)}" width="{w}" height="{h}" rx="2.2" fill="#FFFFFF" stroke="#1C1A17" stroke-width=".55"/>'
+          f'<rect x="{f(u0 + 1.6)}" y="{f(v0 + 1.6)}" width="{w - 3.2}" height="{h - 3.2}" rx="1.2" fill="none" stroke="{RED}" stroke-width=".6"/>'
+          f'<g fill="none" stroke="{RED}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">{arrows}</g>'
+          f'<text x="{f(cx)}" y="{f(v0 + 19.4)}" font-size="4.6" font-weight="700" text-anchor="middle" fill="{RED}" letter-spacing=".3">小心輕放</text>'
+          '</g></g>')
     # 四片蓋：先蓋左右兩片短蓋，再蓋前後兩片長蓋，最後貼封箱膠帶（JS 依進度換影格）
     L = bd / 2
     def flap(hinge, t):
@@ -769,13 +810,12 @@ def proc_ship():
     S.poly([(tx, ty, 60), (X1, ty, 60), (X1, Ys, 60), (tx, Ys, 60)])
     side = notched(tx, X1, 14, [(X1, 60), (tx, 60)], wheels_x[:2])
     S.poly([(u, Ys, v) for u, v in side])
+    S.outline_path([(u, Ys, v) for u, v in side[:-2]] + [(X1, ty, 14), (X1, ty, 60), (tx, ty, 60), (tx, Ys, 60)], close=True)
     for wx in wheels_x[:2]:
         fender(wx, Ys)
     for i in range(1, 6):
         S.line((X1, ty + i * 6.6, 17), (X1, ty + i * 6.6, 58), "h")
-    S.text("xz", Ys, tx + 10, -46, "倚樂企業 YI HAPPY", size=7.4, weight=500)
-    S.line((tx + 10, Ys, 34), (tx + 70, Ys, 34), "f")
-    S.text("xz", Ys, tx + 10, -26, "教科書 · 書籍印刷", size=5.4)
+    S.sticker("xz", Ys, tx + 18, -56, 58, rot=-3)
     # 車頭：側面輪廓（斜擋風玻璃），前輪處一樣有輪拱
     cx, y0, y1 = tx + 98, ty + 2, ty + 38
     S.poly([(cx + 24, y0, 14), (cx + 24, y1, 14), (cx + 24, y1, 25), (cx + 24, y0, 25)])             # 車頭正面
@@ -783,6 +823,7 @@ def proc_ship():
     S.poly([(cx, y0, 36), (cx + 14, y0, 36), (cx + 14, y1, 36), (cx, y1, 36)])                       # 車頂
     cab = notched(cx, cx + 24, 14, [(cx + 24, 25), (cx + 14, 36), (cx, 36)], wheels_x[2:])
     S.poly([(u, y1, v) for u, v in cab])
+    S.outline_path([(u, y1, v) for u, v in cab[:-3]] + [(cx + 24, y0, 14), (cx + 24, y0, 25), (cx + 14, y0, 36), (cx, y0, 36), (cx, y1, 36)], close=True)
     fender(wheels_x[2], y1)
     S.poly([(cx + 23, y0 + 3, 26.5), (cx + 23, y1 - 3, 26.5), (cx + 15.4, y1 - 3, 34), (cx + 15.4, y0 + 3, 34)], "h", fill=False)
     S.poly([(cx + 3, y1, 24), (cx + 12, y1, 24), (cx + 12, y1, 33), (cx + 3, y1, 33)], "f", fill=False)
