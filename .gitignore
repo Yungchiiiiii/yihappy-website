@@ -1,11 +1,1 @@
-node_modules/
-dist/
-.astro/
-.cache/
-qa/screenshots/
-qa/lighthouse/
-npm-debug.log*
 .DS_Store
-
-# 本機草稿（不上線）：早期流程動畫試作、沒用到的機器影片
-drafts/
