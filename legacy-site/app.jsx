@@ -96,7 +96,7 @@ function ProcessScroller() {
       const pair = (v) => (v || "0,0").split(",").map(Number);
       const axes = q("axes");
       parts[i] = {
-        lines, q, filled: new Set(filled),
+        lines, q, filled: new Set(filled), last: new Float32Array(lines.length).fill(-1), lastText: -1,
         texts: [...svg.querySelectorAll(".tx")].filter((t) => !t.closest('[data-role="stamp"]')),
         swatches: [...svg.querySelectorAll(".sw")],
         dots: [...svg.querySelectorAll(".dot")],
@@ -121,13 +121,18 @@ function ProcessScroller() {
       if (!P) return;
       const n = P.lines.length;
       const local = dp / 0.72;
-      P.lines.forEach((el, k) => {
-        const a = clamp((local - (k / n) * 0.7) / 0.3);
+      const last = P.last;
+      for (let k = 0; k < n; k++) {
+        const a = Math.round(clamp((local - (k / n) * 0.7) / 0.3) * 1000) / 1000;
+        if (a === last[k]) continue; // 沒變的線不碰，省下手機重畫的成本
+        const el = P.lines[k];
+        if (last[k] < 0 || (a > 0) !== (last[k] > 0)) el.style.visibility = a > 0 ? "" : "hidden"; // 還沒開始畫的線藏起來，不然圓角線頭會先露出一個黑點
         el.style.strokeDashoffset = 1 - a;
-        el.style.visibility = a > 0.002 ? "" : "hidden"; // 還沒開始畫的線藏起來，不然圓角線頭會先露出一個黑點
         if (P.filled.has(el)) el.style.fillOpacity = a;
-      });
-      P.texts.forEach((t) => (t.style.opacity = seg(local, 0.55, 0.85)));
+        last[k] = a;
+      }
+      const to = Math.round(seg(local, 0.55, 0.85) * 100) / 100;
+      if (to !== P.lastText) { P.lastText = to; P.texts.forEach((t) => (t.style.opacity = to)); }
       const m = seg(dp, 0.62, 1); // 畫完之後的動作
       if (i === 0) {
         P.dots.forEach((d, k) => (d.style.opacity = seg(dp, 0.74 + k * 0.07, 0.82 + k * 0.07)));
@@ -190,33 +195,35 @@ function ProcessScroller() {
       }
     }
 
-    // 每一步的進度：左邊圓點變黑（圓點捲到畫面 55% 高度）時開始畫，插圖中心捲到畫面 42% 高度時畫完
-    // 一進頁面就已經過了起點的步驟，從「現在的位置」才開始算，所以沒往下滑之前一筆都不會畫
-    // 每一步捲到畫面上方一點會停住（sticky），停住的這段捲動距離拿來慢慢畫，畫完才往上離開
-    // 進度用「這一步的頂端位置 T」算：圓點捲到畫面 55% 時開始，快要解除停住時畫完
+    // 每一步捲到畫面中間偏下會停住（sticky），停住的這段捲動距離拿來慢慢畫，畫完才往上離開
+    // 為了手機順暢：各元素的位置只在載入、改變大小時量一次（measure），捲動時只用 scrollY 計算，不再讀版面
     const pins = panels.map((pn) => pn.querySelector(".hp-pin"));
-    const range = (i) => {
-      const vh = innerHeight, st = panels[i].getBoundingClientRect(), pin = pins[i].getBoundingClientRect();
-      const d = dots[i].getBoundingClientRect();
-      const pinTop = parseFloat(getComputedStyle(pins[i]).top) || 0;
-      const cs = getComputedStyle(panels[i]);
-      const head = parseFloat(cs.paddingTop) || 0, foot = parseFloat(cs.paddingBottom) || 0;
-      const dotOff = head + d.top + d.height / 2 - pin.top;            // 圓點離這一步頂端多遠（還沒停住時）
-      const Ts = Math.min(vh * 0.55 - dotOff, st.top + scrollY);       // 一進頁面就已經過了起點的話，從目前位置才開始
-      const Te = pinTop + pin.height + foot - st.height + vh * 0.08;   // 解除停住前一點點畫完
-      return { T: st.top, Ts, Te: Math.min(Te, Ts - vh * 0.5) };
-    };
-    // 停住的位置：整步在畫面裡上下置中再偏下一點，但不能被上方選單蓋到
-    function placePins() {
-      const vh = innerHeight, minTop = innerWidth <= 980 ? 96 : 120;
-      pins.forEach((pin) => {
-        const h = pin.getBoundingClientRect().height;
-        pin.style.top = Math.round(Math.max(minTop, Math.min((vh - h) / 2 + vh * 0.04, vh - h - 48))) + "px";
+    let G = null; // 量好的幾何資料
+    function measure() {
+      const vh = innerHeight, sy = scrollY, minTop = innerWidth <= 980 ? 96 : 120;
+      const wTop = W.getBoundingClientRect().top + sy;
+      const steps = panels.map((pn, i) => {
+        const st = pn.getBoundingClientRect(), pr = pins[i].getBoundingClientRect(), d = dots[i].getBoundingClientRect();
+        const cs = getComputedStyle(pn);
+        const head = parseFloat(cs.paddingTop) || 0, foot = parseFloat(cs.paddingBottom) || 0;
+        const pinH = pr.height, dotIn = d.top + d.height / 2 - pr.top;
+        // 停住的位置：上下置中再偏下一點，不被選單蓋到、下面留一點邊
+        const pinTop = Math.round(Math.max(minTop, Math.min((vh - pinH) / 2 + vh * 0.04, vh - pinH - 48)));
+        const top = st.top + sy, h = st.height;
+        const Ts = Math.min(vh * 0.55 - (head + dotIn), top);             // 圓點捲到 55% 高度時開始；一進頁面就過了的話從目前位置開始
+        const Te = Math.min(pinTop + pinH + foot - h + vh * 0.08, Ts - vh * 0.5); // 快解除停住時畫完
+        return { top, h, head, foot, pinH, pinTop, dotIn, Ts, Te };
       });
+      steps.forEach((g, i) => { pins[i].style.top = g.pinTop + "px"; });
+      G = { vh, wTop, steps };
     }
-    const targetOf = (i) => {
-      const { T, Ts, Te } = range(i);
-      return clamp((Ts - T) / (Ts - Te));
+    const tOf = (i, sy) => G.steps[i].top - sy; // 這一步頂端在畫面上的位置
+    const targetOf = (i, sy) => { const g = G.steps[i]; return clamp((g.Ts - tOf(i, sy)) / (g.Ts - g.Te)); };
+    // 圓點目前在流程區塊裡的高度（考慮停住的狀態）
+    const dotYOf = (i, sy) => {
+      const g = G.steps[i], T = tOf(i, sy);
+      const pv = Math.min(Math.max(T + g.head, g.pinTop), T + g.h - g.foot - g.pinH);
+      return pv + g.dotIn - (G.wTop - sy);
     };
     function render(i) {
       const dp = reduce ? 1 : (window.__hpLock ? window.__hpLock[i] ?? shown[i] : shown[i]);
@@ -226,62 +233,74 @@ function ProcessScroller() {
     }
 
     // 時間軸：某一步開始畫，它的圓點就變黑；線跟著那一步畫的進度，往下一個圓點長過去
-    function updateRail() {
-      const base = W.getBoundingClientRect().top;
-      const dotY = dots.map((d) => { const r = d.getBoundingClientRect(); return r.top + r.height / 2 - base; });
+    let railKey = "", dotOn = dots.map(() => null);
+    function updateRail(sy) {
+      const dotY = dots.map((_, i) => dotYOf(i, sy));
       const top = dotY[0], len = Math.max(1, dotY[N - 1] - dotY[0]);
-      rail.style.top = top + "px"; rail.style.height = len + "px";
       let k = -1;
       shown.forEach((v, i) => { if (v > 0.001) k = i; });
       const end = reduce ? dotY[N - 1] : k < 0 ? top : dotY[k] + (k < N - 1 ? (dotY[k + 1] - dotY[k]) * shown[k] : 0);
-      fill.style.transform = `scaleY(${clamp((end - top) / len)})`;
-      dots.forEach((d, i) => d.classList.toggle("on", reduce || shown[i] > 0.001));
+      const key = `${Math.round(top)}:${Math.round(len)}:${(clamp((end - top) / len)).toFixed(3)}`;
+      if (key !== railKey) {
+        railKey = key;
+        rail.style.transform = `translate3d(0,${top.toFixed(1)}px,0)`;
+        rail.style.height = Math.round(len) + "px";
+        fill.style.transform = `scaleY(${clamp((end - top) / len).toFixed(3)})`;
+      }
+      dots.forEach((d, i) => { const on = reduce || shown[i] > 0.001; if (on !== dotOn[i]) { dotOn[i] = on; d.classList.toggle("on", on); } });
     }
 
     // 往下的箭頭：停下來一下、而且下面還有步驟沒看完時才出現；一捲動就收起來
     let idle = 0, cueOn = false;
     const moreBelow = () => {
-      const w = W.getBoundingClientRect();
-      if (w.top > innerHeight || w.bottom < innerHeight * 0.5) return false;
+      const sy = scrollY, wb = G.wTop + W.offsetHeight;
+      if (G.wTop - sy > innerHeight || wb - sy < innerHeight * 0.5) return false;
       return shown[N - 1] < 0.97;
     };
     const setCue = (v) => { if (v !== cueOn) { cueOn = v; cue.classList.toggle("show", v); } };
     const armCue = (ms) => { clearTimeout(idle); idle = setTimeout(() => setCue(moreBelow()), ms); };
     // 點箭頭：捲到下一個還沒畫完的步驟
     const nextStep = () => {
-      const i = shown.findIndex((s) => s < 0.97);
-      const { T, Te } = range(i < 0 ? N - 1 : i);
-      scrollTo({ top: scrollY + (T - Te), behavior: reduce ? "auto" : "smooth" });
+      const f = shown.findIndex((s) => s < 0.97);
+      const g = G.steps[f < 0 ? N - 1 : f];
+      scrollTo({ top: g.top - g.Te, behavior: reduce ? "auto" : "smooth" });
     };
     cue.addEventListener("click", nextStep);
 
-    let raf = 0;
-    const update = (k) => {
+    // 只在需要的時候跑動畫迴圈：捲動時啟動，追上目標就停，不會一直耗電
+    let raf = 0, running = false;
+    const K = reduce ? 1 : 0.24;
+    function frame() {
+      const sy = scrollY;
+      let moving = false;
       for (let i = 0; i < N; i++) {
-        const t = targetOf(i);
-        shown[i] += (t - shown[i]) * k;
-        if (Math.abs(t - shown[i]) < 0.0004) shown[i] = t;
+        const t = targetOf(i, sy);
+        shown[i] += (t - shown[i]) * K;
+        if (Math.abs(t - shown[i]) < 0.0006) shown[i] = t; else moving = true;
         render(i);
       }
-      updateRail();
-    };
-    const tick = () => { update(reduce ? 1 : 0.16); raf = requestAnimationFrame(tick); };
-    const onScroll = () => { update(0.5); setCue(false); armCue(1300); };
-    const onResize = () => { placePins(); update(1); };
-    placePins();
-    update(1);
-    raf = requestAnimationFrame(tick);
+      updateRail(sy);
+      return moving;
+    }
+    const tick = () => { if (frame()) raf = requestAnimationFrame(tick); else running = false; };
+    const kick = () => { if (!running) { running = true; raf = requestAnimationFrame(tick); } };
+    const onScroll = () => { kick(); setCue(false); armCue(1300); };
+    const relayout = () => { measure(); railKey = ""; kick(); };
+    measure();
+    for (let i = 0; i < N; i++) shown[i] = targetOf(i, scrollY);
+    frame();
     addEventListener("scroll", onScroll, { passive: true });
-    addEventListener("resize", onResize);
-    // 插圖載入、字型換好後高度會變，時間軸要重新量
-    const ro = new ResizeObserver(() => { placePins(); updateRail(); });
+    addEventListener("resize", relayout);
+    // 插圖載入、字型換好後高度會變，重新量一次
+    const ro = new ResizeObserver(relayout);
     ro.observe(W);
     armCue(900);
     // 測試用：__hpDraw([0..1, ...]) 鎖定每一步的進度
     window.__hpDraw = (arr) => { window.__hpLock = arr; drawn.fill(-1); for (let i = 0; i < N; i++) render(i); };
+    window.__hpFrame = frame;
     return () => {
       cancelAnimationFrame(raf); clearTimeout(idle); ro.disconnect();
-      removeEventListener("scroll", onScroll); removeEventListener("resize", onResize);
+      removeEventListener("scroll", onScroll); removeEventListener("resize", relayout);
       cue.removeEventListener("click", nextStep);
     };
   }, []);
